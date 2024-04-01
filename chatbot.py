@@ -13,7 +13,18 @@ class Basic_info:
         self.initialize_data(data)
 
     def initialize_data(self, data):
+        df = pd.read_csv("Datasets/2. cost_of_living.csv")
+        cost_living = df.to_dict(orient='records')
+        i = 0
+
         for d in data:
+            for c in cost_living:
+                if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower():
+                    i += 1
+                    d["cost_of_living"] = c["cost_of_living"]
+                    d["global_rank"] = c["global_rank"]
+                    print(i, ". ", d["country"], "has ", d["cost_of_living"], "cost of living and is in the ", d["global_rank"], "global rank")
+                    break
             first_letter = d["country"][0]
             if first_letter not in self.countries_data:
                 self.countries_data[first_letter] = []
