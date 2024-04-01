@@ -36,15 +36,24 @@ def process_text(text):
     filtered = filter_stop_words(tokens)
     return lemmatize(filtered)
 
-# Check words to end the program
-def checkExit(text):
-    exit_words = ["exit", "quit", "bye", "goodbye"]
-    for word in text:
-        for exit_word in exit_words:
-            if word.lower() == exit_word:
-                return True
-
 def main():
+    exit_words = ["exit", "quit", "bye", "goodbye"]
+    negative_words = ["worst", "awful",'bad', "terrible"]
+    positive_words = ["best","excellent", "amazing", "incredible", "nice", "wonderful"]
+    continent_words = ["europe", "asia", "africa", "america", "oceania"]
+    # Words that might be used for looking for a country based on a parameter or ask for the information of the country parameter
+    key_words = ["currency", "place", "locat", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor"]
+    df = pd.read_csv("Datasets/3. All Countries.csv")
+    data = df.to_dict(orient='records')
+    
+    # Group data into list of dictionaries based on the first letter
+    countries_data = {}
+    for d in data:
+        first_letter = d["country"][0]
+        if first_letter not in countries_data:
+            countries_data[first_letter] = []
+        countries_data[first_letter].append(d)
+
     while True:
         # Read the data
         data = input("\n> ")
@@ -52,10 +61,20 @@ def main():
         processed_data = process_text(data)
         print(processed_data)
 
-        # Check for exit
-        if checkExit(processed_data):
-            print("Bye, have a great day!")
-            return
+        # Check text
+        countries = []
+        continents = []
+        for word in text:
+            for d in countries_data[word[0].upper()]:
+                if word.lower() == d["country"].lower() or word.lower() in d["country"].lower():
+                    countries.append(word)
+
+
+            # Last checking to be made
+            for exit_word in exit_words:
+                if word.lower() == exit_word:
+                    print("Bye, have a great day!")
+                    return
 
 if __name__ == "__main__":
     main()
