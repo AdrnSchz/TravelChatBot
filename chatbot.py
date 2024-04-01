@@ -71,6 +71,16 @@ def check_country(basic_info, country, parameters):
             print("I would recommed you to visit", country_info["country"], ", as it is a rich country and...")
         else:
             print("I wouldn't recommed you to visit", country_info["country"], ", as it is a poor country and...")
+    else:
+        print(country_info["country"])
+        for parameter in parameters:
+            if parameter == "currency":
+                print("uses ", country_info["currency"], " as its currency.")
+            elif parameter == "rich" or parameter == "poor":
+                if country_info["gdp"] >= basic_info.gdp_avg:
+                    print("is a rich country")
+                else:
+                    print("is a poor country")
 
 # Evaluate data taken from the input text
 def evaluate_data(basic_info, countries, continents, go, parameters, positive, negative):
