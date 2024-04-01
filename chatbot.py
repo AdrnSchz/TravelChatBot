@@ -64,6 +64,15 @@ def process_text(text):
     filtered = filter_stop_words(tokens)
     return lemmatize(filtered)
 
+def joinStrings(strings):
+    if strings[len(strings) - 1] == ",":
+        strings[len(strings) - 1] = "."
+    else:
+        strings.append(".")
+    strings[len(strings) - 3] = " and"
+    separator = ""
+    return separator.join(strings)
+
 def check_country(basic_info, country, parameters):
     if (len(parameters) == 0):
         country_info = basic_info.get_country(country)
@@ -72,15 +81,28 @@ def check_country(basic_info, country, parameters):
         else:
             print("I wouldn't recommed you to visit", country_info["country"], ", as it is a poor country and...")
     else:
-        print(country_info["country"])
+        unique = [True, True, True, True, True, True, True]
+        country_info = basic_info.get_country(country)
+        strings = []
+        strings.append(country_info["country"])
+        coma = True
         for parameter in parameters:
-            if parameter == "currency":
-                print("uses ", country_info["currency"], " as its currency.")
-            elif parameter == "rich" or parameter == "poor":
+            coma = True
+        
+            if unique[0] and parameter == "currency":
+                unique[0] = False
+                strings.append(" uses " + country_info["currency"] + " as its currency")
+            elif unique[1] and (parameter == "rich" or parameter == "poor"):
+                unique[1] = False
                 if country_info["gdp"] >= basic_info.gdp_avg:
-                    print("is a rich country")
+                    strings.append(" is a rich country")
                 else:
-                    print("is a poor country")
+                    strings.append(" is a poor country")
+            else:
+                coma = False
+            if coma:
+                strings.append(",")    
+        print(joinStrings(strings))    
 
 # Evaluate data taken from the input text
 def evaluate_data(basic_info, countries, continents, go, parameters, positive, negative):
