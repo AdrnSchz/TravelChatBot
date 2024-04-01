@@ -64,11 +64,20 @@ def main():
         # Check text
         countries = []
         continents = []
+        positive = 0
+        negative = 0
         for word in text:
             for d in countries_data[word[0].upper()]:
                 if word.lower() == d["country"].lower() or word.lower() in d["country"].lower():
                     countries.append(word)
 
+            for positive_word in positive_words:
+                if positive_word == word.lower():
+                    positive += 1
+
+            for negative_word in negative_words:
+                if negative_word == word.lower():
+                    negative += 1
 
             # Last checking to be made
             for exit_word in exit_words:
