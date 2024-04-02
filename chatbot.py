@@ -11,7 +11,7 @@ class BasicInfo:
         self.gdp_avg = 0
         self.crime_rate_avg = 0
         self.num_countries = 0
-        self.num_countries_cr = 0
+        self.crime_indices = []
         self.initialize_data(data)
 
     def initialize_data(self, data):
@@ -35,7 +35,7 @@ class BasicInfo:
             i = 0
             d["crime_rate"] = 0
             for c in crime_index:
-                if d["country"].lower() in c["City"].lower().split(',')[1]:
+                if d["country"].lower() in c["City"].lower().rsplit(',', 1)[1]:
                     d["crime_rate"] += c["Crime Index"]
                     i = i + 1
 
@@ -43,6 +43,7 @@ class BasicInfo:
                 d["crime_rate"] = -1
             else:
                 d["crime_rate"] /= i
+                self.crime_indices.append(d["crime_rate"])
 
             first_letter = d["country"][0]
             if first_letter not in self.countries_data:
@@ -51,12 +52,11 @@ class BasicInfo:
             if "gdp" in d and not math.isnan(d["gdp"]) and "population" in d and not math.isnan(d["population"]):
                 self.gdp_avg += d["gdp"] / d["population"]
                 self.num_countries += 1
-            if "crime_rate" in d:
-                self.crime_rate_avg += d["crime_rate"]
-                self.num_countries_cr += 1
-            
+
         self.gdp_avg /= self.num_countries
-        self.crime_rate_avg /= self.num_countries_cr
+
+        self.crime_indices.sort()
+        self.crime_rate_avg = self.crime_indices[int(len(self.crime_indices)/2)]
     
     def get_country(self, country):
         for initial_letter, countries_list in self.countries_data.items():
@@ -138,7 +138,9 @@ def check_country(basic_info, country, parameters):
                 unique[2] = False
                 print(basic_info.crime_rate_avg) ####
                 print(country_info["crime_rate"]) ###
-                if country_info["crime_rate"] >= basic_info.crime_rate_avg:
+                if abs(basic_info.crime_rate_avg - country_info["crime_rate"]) < 10:
+                    strings.append(" has a medium crime rate")
+                elif country_info["crime_rate"] >= basic_info.crime_rate_avg:
                     strings.append(" has a high crime rate")
                 elif country_info["crime_rate"] != -1:
                     strings.append(" has a low crime rate")
@@ -211,11 +213,10 @@ def main():
         negative = 0
         finish = 0
         go = 0
-        for word in processed_data:
+        for i, word in enumerate(processed_data):
             for d in basic_info.countries_data[word[0].upper()]:
-                if d["country"].lower() == word or word in d["country"].lower():
-                    countries.append(word)
-
+                if d["country"].lower() == word or (word in d["country"].lower() and i+1 < len(processed_data) and processed_data[i+1] in d["country"].lower()):
+                    countries.append(d["country"].lower())
             for positive_word in positive_words:
                 if positive_word == word:
                     positive += 1
