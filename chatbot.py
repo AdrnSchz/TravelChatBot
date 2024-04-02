@@ -6,15 +6,19 @@ from nltk.corpus import stopwords
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 
 class BasicInfo:
-    def __init__(self, data):
+    def __init__(self):
         self.countries_data = {}
         self.gdp_avg = 0
         self.crime_rate_avg = 0
         self.num_countries = 0
         self.crime_indices = []
-        self.initialize_data(data)
+        self.initialize_data()
 
-    def initialize_data(self, data):
+    def initialize_data(self):
+        df = pd.read_csv("Datasets/3. All Countries.csv")
+        countries_data = df.to_dict(orient='records')
+        df = pd.read_csv("Datasets/0. Global Country Information Dataset 2023.csv")
+        global_info = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/1. Countries of the World.csv")
         other_info = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/2. cost_of_living.csv")
@@ -22,7 +26,7 @@ class BasicInfo:
         df = pd.read_csv("Datasets/4. World Crime Index.csv")
         crime_index = df.to_dict(orient='records')
 
-        for d in data:
+        for d in countries_data:
             for c in cost_living:
                 if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
                     d["cost_of_living"] = c["cost_of_living"]
@@ -35,6 +39,10 @@ class BasicInfo:
                     d["literacy"] = c["Literacy"]
                     d["phones"] = c["Phones"]
                     d["climate"] = c["Climate"]
+                    break
+            for c in global_info:
+                if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
+                    d["language"] = c["Official language"]
                     break
             
             # Extract country's average crime rate with rates of its cities
@@ -119,12 +127,12 @@ def join_strings(strings):
 def print_country_info(basic_info, country):
     country_info = basic_info.get_country(country)
     if country_info["gdp"] / country_info["population"] >= basic_info.gdp_avg:
-        print("I would recommed you to visit", country_info["country"], ", as it is a rich country")
+        print("I would recommend you to visit " + country_info["country"] + ", as it is a rich country")
     else:
-        print("I wouldn't recommed you to visit", country_info["country"], ", as it is a poor country")
-    print("It is located in", country_info["region"], "and their main language is. It has a population of", country_info["population"], 
-                "people, they use the ", country_info["currency"], " as its currency and its ", country_info["title"].lower(), " is ", 
-                country_info["political_leader"])
+        print("I wouldn't recommend you to visit " + country_info["country"] + ", as it is a poor country")
+    print("It is located in " + country_info["region"] + " and their main language is " + country_info["language"] + ". It has a population of " + str(country_info["population"]) +
+                " people, they use the " + country_info["currency"] + " as its currency and its " + country_info["title"].lower() + " is " + country_info["political_leader"])
+    
 def check_country(basic_info, country, parameters):
     if (len(parameters) == 0):
         print_country_info(basic_info, country)
@@ -176,10 +184,10 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
         else:
             print("If I had to say one, I would say Somalia is the worst country to go. It is a very poor country, underdeveloped, with a very high criminal rate and risk of dying!")
     elif (len(countries) == 1):
-        print(check_country(basic_info, countries[0], parameters))
+        check_country(basic_info, countries[0], parameters)
     elif (len(countries) > 1):
         for country in countries:
-            print(check_country(basic_info, country, parameters))
+            check_country(basic_info, country, parameters)
     elif (len(continents) == 1):
         #TODO: same as countries but looking through countries in a continent
         print("a")
@@ -198,11 +206,9 @@ def main():
     # Words that might be used for looking for a country based on a parameter or ask for the information of the country parameter
     visit_words = ["recommend", "go", "visit", "place"]
     key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor", "information", "tell"]
-    df = pd.read_csv("Datasets/3. All Countries.csv")
-    data = df.to_dict(orient='records')
 
     # Group data into list of dictionaries based on the first letter    
-    basic_info = BasicInfo(data)
+    basic_info = BasicInfo()
 
     while True:    
         # Read and process input (tokenization, filtering and lemmatization)
