@@ -21,7 +21,7 @@ class BasicInfo:
         cost_living = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/4. World Crime Index.csv")
         crime_index = df.to_dict(orient='records')
-        i = 0
+        #i = 0
 
         for d in data:
             for c in cost_living:
@@ -43,17 +43,17 @@ class BasicInfo:
                     #d["literacy"], " % of the population is literated and there are ", d["phones"], " phones per 1000 people. Finally, they have a climate of ", d["climate"])
                     break
 
-            j = 0
+            i = 0
             d["crime_rate"] = 0
             for c in crime_index:
                 if d["country"].lower() in c["City"].lower().rsplit(',', 1)[1]:
                     d["crime_rate"] += c["Crime Index"]
-                    j = i + 1
+                    i = i + 1
 
-            if j == 0:
+            if i == 0:
                 d["crime_rate"] = -1
             else:
-                d["crime_rate"] /= j
+                d["crime_rate"] /= i
                 self.crime_indices.append(d["crime_rate"])
 
             first_letter = d["country"][0]
