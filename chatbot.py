@@ -189,11 +189,11 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
         for country in countries:
             check_country(basic_info, country, parameters)
     elif (len(continents) == 1):
-        #TODO: same as countries but looking through countries in a continent
-        print("a")
+        #TODO(For phase 3): same as countries but looking through countries in a continent
+        print("Feature yet to implement")
     elif (len(continents) > 1):
-        #TODO: for continent in continents
-        print("a")
+        #TODO(For phase 3): same as above for n continents
+        print("Feature yet to implement")
     else:
         print("I can't understand. Please reformulate or elaborate more your words.")
                      
