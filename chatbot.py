@@ -15,6 +15,8 @@ class BasicInfo:
         self.initialize_data(data)
 
     def initialize_data(self, data):
+        df = pd.read_csv("Datasets/0. Global Country Information Dataset 2023.csv")
+        language = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/1. Countries of the World.csv")
         other_info = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/2. cost_of_living.csv")
@@ -24,13 +26,12 @@ class BasicInfo:
         i = 0
 
         for d in data:
-            for c in cost_living:
-                if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
-                    #i += 1
-                    d["cost_of_living"] = c["cost_of_living"]
-                    d["global_rank"] = c["global_rank"]
-                    #print(i, ". ", d["country"], "has ", d["cost_of_living"], "cost of living and is in the ", d["global_rank"], "global rank")
-                    break
+            for c in language:
+                if c["Country"].lower() in d["country_long"].lower():
+                    i += 1
+                    d["language"] = c["Language"]
+                    print(i, ". ", d["country"], "has ", d["language"])
+
             for c in other_info:
                 if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
                     #i += 1
@@ -42,7 +43,13 @@ class BasicInfo:
                     #print(i, ". ", d["country"], "has an area of", d["area"], " square km and it has a ", d["coastline"], "coast/area ratio. Moreover, the ", 
                     #d["literacy"], " % of the population is literated and there are ", d["phones"], " phones per 1000 people. Finally, they have a climate of ", d["climate"])
                     break
-
+            for c in cost_living:
+                if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
+                    #i += 1
+                    d["cost_of_living"] = c["cost_of_living"]
+                    d["global_rank"] = c["global_rank"]
+                    #print(i, ". ", d["country"], "has ", d["cost_of_living"], "cost of living and is in the ", d["global_rank"], "global rank")
+                    break
             j = 0
             d["crime_rate"] = 0
             for c in crime_index:
@@ -139,9 +146,6 @@ def check_country(basic_info, country, parameters):
         coma = True
         for parameter in parameters:
             coma = True
-
-            #key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor"]
-        
             if unique[0] and parameter == "currency":
                 unique[0] = False
                 strings.append(" uses " + country_info["currency"] + " as its currency")
