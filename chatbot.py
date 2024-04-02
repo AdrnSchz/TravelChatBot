@@ -15,17 +15,15 @@ class BasicInfo:
         self.initialize_data(data)
 
     def initialize_data(self, data):
-        df = pd.read_csv("Datasets/2. cost_of_living.csv")
-        cost_living = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/1. Countries of the World.csv")
         other_info = df.to_dict(orient='records')
-        i = 0
-
+        df = pd.read_csv("Datasets/2. cost_of_living.csv")
+        cost_living = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/4. World Crime Index.csv")
         crime_index = df.to_dict(orient='records')
+        i = 0
 
         for d in data:
-
             for c in cost_living:
                 if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
                     #i += 1
@@ -35,27 +33,27 @@ class BasicInfo:
                     break
             for c in other_info:
                 if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
-                    i += 1
+                    #i += 1
                     d["area"] = c["Area"]
                     d["coastline"] = c["Coastline"]
                     d["literacy"] = c["Literacy"]
                     d["phones"] = c["Phones"]
                     d["climate"] = c["Climate"]
-                    print(i, ". ", d["country"], "has an area of", d["area"], " square km and it has a ", d["coastline"], "coast/area ratio. Moreover, the ", 
-                    d["literacy"], " % of the population is literated and there are ", d["phones"], " phones per 1000 people. Finally, they have a climate of ", d["climate"])
+                    #print(i, ". ", d["country"], "has an area of", d["area"], " square km and it has a ", d["coastline"], "coast/area ratio. Moreover, the ", 
+                    #d["literacy"], " % of the population is literated and there are ", d["phones"], " phones per 1000 people. Finally, they have a climate of ", d["climate"])
                     break
 
-            i = 0
+            j = 0
             d["crime_rate"] = 0
             for c in crime_index:
                 if d["country"].lower() in c["City"].lower().split(',')[1]:
                     d["crime_rate"] += c["Crime Index"]
-                    i = i + 1
+                    j = i + 1
 
-            if i == 0:
+            if j == 0:
                 d["crime_rate"] = -1
             else:
-                d["crime_rate"] /= i
+                d["crime_rate"] /= j
 
             first_letter = d["country"][0]
             if first_letter not in self.countries_data:
