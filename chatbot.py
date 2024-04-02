@@ -21,34 +21,29 @@ class BasicInfo:
         cost_living = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/4. World Crime Index.csv")
         crime_index = df.to_dict(orient='records')
-        #i = 0
 
         for d in data:
             for c in cost_living:
                 if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
-                    #i += 1
                     d["cost_of_living"] = c["cost_of_living"]
                     d["global_rank"] = c["global_rank"]
-                    #print(i, ". ", d["country"], "has ", d["cost_of_living"], "cost of living and is in the ", d["global_rank"], "global rank")
                     break
             for c in other_info:
                 if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
-                    #i += 1
                     d["area"] = c["Area"]
                     d["coastline"] = c["Coastline"]
                     d["literacy"] = c["Literacy"]
                     d["phones"] = c["Phones"]
                     d["climate"] = c["Climate"]
-                    #print(i, ". ", d["country"], "has an area of", d["area"], " square km and it has a ", d["coastline"], "coast/area ratio. Moreover, the ", 
-                    #d["literacy"], " % of the population is literated and there are ", d["phones"], " phones per 1000 people. Finally, they have a climate of ", d["climate"])
                     break
-
+            
+            # Extract country's average crime rate with rates of its cities
             i = 0
             d["crime_rate"] = 0
             for c in crime_index:
                 if d["country"].lower() in c["City"].lower().rsplit(',', 1)[1]:
                     d["crime_rate"] += c["Crime Index"]
-                    i = i + 1
+                    i += 1
 
             if i == 0:
                 d["crime_rate"] = -1
@@ -56,16 +51,20 @@ class BasicInfo:
                 d["crime_rate"] /= i
                 self.crime_indices.append(d["crime_rate"])
 
+            # Countries are grouped by their first letter to allow faster access and search later
             first_letter = d["country"][0]
             if first_letter not in self.countries_data:
                 self.countries_data[first_letter] = []
             self.countries_data[first_letter].append(d)
+
+            # Add country's gdp per capita to later calculate average
             if "gdp" in d and not math.isnan(d["gdp"]) and "population" in d and not math.isnan(d["population"]):
                 self.gdp_avg += d["gdp"] / d["population"]
                 self.num_countries += 1
 
         self.gdp_avg /= self.num_countries
 
+       # Sort and set crime rate average as the median of the country rates
         self.crime_indices.sort()
         self.crime_rate_avg = self.crime_indices[int(len(self.crime_indices)/2)]
     
@@ -109,16 +108,15 @@ def process_text(text):
     filtered = filter_stop_words(tokens)
     return lemmatize(filtered)
 
-def joinStrings(strings):
+def join_strings(strings):
     if strings[len(strings) - 1] == ",":
         strings[len(strings) - 1] = "."
     else:
         strings.append(".")
-    #strings[len(strings) - 3] = " and"
     separator = ""
     return separator.join(strings)
 
-def printCountryInfo(basic_info, country):
+def print_country_info(basic_info, country):
     country_info = basic_info.get_country(country)
     if country_info["gdp"] / country_info["population"] >= basic_info.gdp_avg:
         print("I would recommed you to visit", country_info["country"], ", as it is a rich country")
@@ -129,7 +127,7 @@ def printCountryInfo(basic_info, country):
                 country_info["political_leader"])
 def check_country(basic_info, country, parameters):
     if (len(parameters) == 0):
-        printCountryInfo(basic_info, country)
+        print_country_info(basic_info, country)
         country_info = basic_info.get_country(country)
     else:
         unique = [True, True, True, True, True, True, True]
@@ -140,8 +138,6 @@ def check_country(basic_info, country, parameters):
         for parameter in parameters:
             coma = True
 
-            #key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor"]
-        
             if unique[0] and parameter == "currency":
                 unique[0] = False
                 strings.append(" uses " + country_info["currency"] + " as its currency")
@@ -153,8 +149,6 @@ def check_country(basic_info, country, parameters):
                     strings.append(" is a poor country")
             elif unique[2] and (parameter == "danger" or parameter == "secur" or parameter == "safe"):
                 unique[2] = False
-                print(basic_info.crime_rate_avg) ####
-                print(country_info["crime_rate"]) ###
                 if abs(basic_info.crime_rate_avg - country_info["crime_rate"]) < 10:
                     strings.append(" has a medium crime rate")
                 elif country_info["crime_rate"] >= basic_info.crime_rate_avg:
@@ -167,33 +161,33 @@ def check_country(basic_info, country, parameters):
                 coma = False
             if coma:
                 strings.append(",")    
-        print(joinStrings(strings))    
+        print(join_strings(strings))    
 
 # Evaluate data taken from the input text
 def evaluate_data(basic_info, countries, continents, go, parameters, positive, negative):
     is_positive = positive - negative
-    # Should make a function to grade countries and be able to order them from best to worst
+    # TODO: Should make a function to grade countries and be able to order them from best to worst
 
     if (go == 0 and len(countries) == 0 and len(continents) == 0 and len(parameters) == 0):
-        print("Please explain better.")
+        print("I can't understand. Please reformulate or elaborate more your words.")
     elif (len(countries) == 0 and len(continents) == 0 and len(parameters) == 0):
         if is_positive >= 0:
-            print("In my opinion the best country to go would be Spain. As it has a cheap living cost, has a good service infrastructure and it has a good climate!")
+            print("In my opinion the best country to go would be Spain. It has a relatively cheap living cost, has a good service infrastructure and it has a good climate!")
         else:
-            print("If I had to say one, I would say Somalia is the worst country to go. As it is a very poor country, underdeveloped, with a very high criminal rate and risk of dying!")    
+            print("If I had to say one, I would say Somalia is the worst country to go. It is a very poor country, underdeveloped, with a very high criminal rate and risk of dying!")
     elif (len(countries) == 1):
         print(check_country(basic_info, countries[0], parameters))
     elif (len(countries) > 1):
         for country in countries:
             print(check_country(basic_info, country, parameters))
     elif (len(continents) == 1):
-        # same as countries but looking through countries in a continent
-        print("texto de ejemplo")
+        #TODO: same as countries but looking through countries in a continent
+        print("a")
     elif (len(continents) > 1):
-        for continent in continents: 
-            print("texto de ejemplo")      
+        #TODO: for continent in continents
+        print("a")
     else:
-        print("Please develop more")
+        print("I can't understand. Please reformulate or elaborate more your words.")
                      
 def main():
 
@@ -211,11 +205,10 @@ def main():
     basic_info = BasicInfo(data)
 
     while True:    
-        # Read the data
+        # Read and process input (tokenization, filtering and lemmatization)
         data = input("\n> ")
         # Process the text
         processed_data = process_text(data.lower())
-        print(processed_data)
 
         # Check text
         countries = []
@@ -254,10 +247,10 @@ def main():
                 if exit_word == word:
                     finish = 1
 
-        evaluate_data(basic_info, countries, continents, go, parameters, positive, negative)
         if finish == 1:
             print("Bye, have a great day!")
             return
+        evaluate_data(basic_info, countries, continents, go, parameters, positive, negative)
 
 if __name__ == "__main__":
     nltk.download('punkt')
