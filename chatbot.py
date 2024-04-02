@@ -6,75 +6,74 @@ from nltk.corpus import stopwords
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 
 class BasicInfo:
-    def __init__(self, data):
+    def __init__(self):
         self.countries_data = {}
         self.gdp_avg = 0
         self.crime_rate_avg = 0
         self.num_countries = 0
-        self.num_countries_cr = 0
-        self.initialize_data(data)
+        self.crime_indices = []
+        self.initialize_data()
 
-    def initialize_data(self, data):
+    def initialize_data(self):
+        df = pd.read_csv("Datasets/3. All Countries.csv")
+        countries_data = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/0. Global Country Information Dataset 2023.csv")
-        language = df.to_dict(orient='records')
+        global_info = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/1. Countries of the World.csv")
         other_info = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/2. cost_of_living.csv")
         cost_living = df.to_dict(orient='records')
         df = pd.read_csv("Datasets/4. World Crime Index.csv")
         crime_index = df.to_dict(orient='records')
-        i = 0
 
-        for d in data:
-            for c in language:
-                if c["Country"].lower() in d["country_long"].lower():
-                    i += 1
-                    d["language"] = c["Language"]
-                    print(i, ". ", d["country"], "has ", d["language"])
-
+        for d in countries_data:
+            for c in cost_living:
+                if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
+                    d["cost_of_living"] = c["cost_of_living"]
+                    d["global_rank"] = c["global_rank"]
+                    break
             for c in other_info:
                 if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
-                    #i += 1
                     d["area"] = c["Area"]
                     d["coastline"] = c["Coastline"]
                     d["literacy"] = c["Literacy"]
                     d["phones"] = c["Phones"]
                     d["climate"] = c["Climate"]
-                    #print(i, ". ", d["country"], "has an area of", d["area"], " square km and it has a ", d["coastline"], "coast/area ratio. Moreover, the ", 
-                    #d["literacy"], " % of the population is literated and there are ", d["phones"], " phones per 1000 people. Finally, they have a climate of ", d["climate"])
                     break
-            for c in cost_living:
-                if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
-                    #i += 1
-                    d["cost_of_living"] = c["cost_of_living"]
-                    d["global_rank"] = c["global_rank"]
-                    #print(i, ". ", d["country"], "has ", d["cost_of_living"], "cost of living and is in the ", d["global_rank"], "global rank")
+            for c in global_info:
+                if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
+                    d["language"] = c["Official language"]
                     break
+
             j = 0
             d["crime_rate"] = 0
             for c in crime_index:
-                if d["country"].lower() in c["City"].lower().split(',')[1]:
+                if d["country"].lower() in c["City"].lower().rsplit(',', 1)[1]:
                     d["crime_rate"] += c["Crime Index"]
-                    j = i + 1
+                    i += 1
 
-            if j == 0:
+            if i == 0:
                 d["crime_rate"] = -1
             else:
-                d["crime_rate"] /= j
+                d["crime_rate"] /= i
+                self.crime_indices.append(d["crime_rate"])
 
+            # Countries are grouped by their first letter to allow faster access and search later
             first_letter = d["country"][0]
             if first_letter not in self.countries_data:
                 self.countries_data[first_letter] = []
             self.countries_data[first_letter].append(d)
+
+            # Add country's gdp per capita to later calculate average
             if "gdp" in d and not math.isnan(d["gdp"]) and "population" in d and not math.isnan(d["population"]):
                 self.gdp_avg += d["gdp"] / d["population"]
                 self.num_countries += 1
-            if "crime_rate" in d:
-                self.crime_rate_avg += d["crime_rate"]
-                self.num_countries_cr += 1
-            
+
         self.gdp_avg /= self.num_countries
-        self.crime_rate_avg /= self.num_countries_cr
+
+       # Sort and set crime rate average as the median of the country rates
+        self.crime_indices.sort()
+        self.crime_rate_avg = self.crime_indices[int(len(self.crime_indices)/2)]
     
     def get_country(self, country):
         for initial_letter, countries_list in self.countries_data.items():
@@ -116,27 +115,26 @@ def process_text(text):
     filtered = filter_stop_words(tokens)
     return lemmatize(filtered)
 
-def joinStrings(strings):
+def join_strings(strings):
     if strings[len(strings) - 1] == ",":
         strings[len(strings) - 1] = "."
     else:
         strings.append(".")
-    #strings[len(strings) - 3] = " and"
     separator = ""
     return separator.join(strings)
 
-def printCountryInfo(basic_info, country):
+def print_country_info(basic_info, country):
     country_info = basic_info.get_country(country)
     if country_info["gdp"] / country_info["population"] >= basic_info.gdp_avg:
-        print("I would recommed you to visit", country_info["country"], ", as it is a rich country")
+        print("I would recommend you to visit " + country_info["country"] + ", as it is a rich country")
     else:
-        print("I wouldn't recommed you to visit", country_info["country"], ", as it is a poor country")
-    print("It is located in", country_info["region"], "and their main language is. It has a population of", country_info["population"], 
-                "people, they use the ", country_info["currency"], " as its currency and its ", country_info["title"].lower(), " is ", 
-                country_info["political_leader"])
+        print("I wouldn't recommend you to visit " + country_info["country"] + ", as it is a poor country")
+    print("It is located in " + country_info["region"] + " and their main language is " + country_info["language"] + ". It has a population of " + str(country_info["population"]) +
+                " people, they use the " + country_info["currency"] + " as its currency and its " + country_info["title"].lower() + " is " + country_info["political_leader"])
+    
 def check_country(basic_info, country, parameters):
     if (len(parameters) == 0):
-        printCountryInfo(basic_info, country)
+        print_country_info(basic_info, country)
         country_info = basic_info.get_country(country)
     else:
         unique = [True, True, True, True, True, True, True]
@@ -146,6 +144,7 @@ def check_country(basic_info, country, parameters):
         coma = True
         for parameter in parameters:
             coma = True
+
             if unique[0] and parameter == "currency":
                 unique[0] = False
                 strings.append(" uses " + country_info["currency"] + " as its currency")
@@ -157,9 +156,9 @@ def check_country(basic_info, country, parameters):
                     strings.append(" is a poor country")
             elif unique[2] and (parameter == "danger" or parameter == "secur" or parameter == "safe"):
                 unique[2] = False
-                print(basic_info.crime_rate_avg) ####
-                print(country_info["crime_rate"]) ###
-                if country_info["crime_rate"] >= basic_info.crime_rate_avg:
+                if abs(basic_info.crime_rate_avg - country_info["crime_rate"]) < 10:
+                    strings.append(" has a medium crime rate")
+                elif country_info["crime_rate"] >= basic_info.crime_rate_avg:
                     strings.append(" has a high crime rate")
                 elif country_info["crime_rate"] != -1:
                     strings.append(" has a low crime rate")
@@ -169,33 +168,33 @@ def check_country(basic_info, country, parameters):
                 coma = False
             if coma:
                 strings.append(",")    
-        print(joinStrings(strings))    
+        print(join_strings(strings))    
 
 # Evaluate data taken from the input text
 def evaluate_data(basic_info, countries, continents, go, parameters, positive, negative):
     is_positive = positive - negative
-    # Should make a function to grade countries and be able to order them from best to worst
+    # TODO: Should make a function to grade countries and be able to order them from best to worst
 
     if (go == 0 and len(countries) == 0 and len(continents) == 0 and len(parameters) == 0):
-        print("Please explain better.")
+        print("I can't understand. Please reformulate or elaborate more your words.")
     elif (len(countries) == 0 and len(continents) == 0 and len(parameters) == 0):
         if is_positive >= 0:
-            print("In my opinion the best country to go would be Spain. As it has a cheap living cost, has a good service infrastructure and it has a good climate!")
+            print("In my opinion the best country to go would be Spain. It has a relatively cheap living cost, has a good service infrastructure and it has a good climate!")
         else:
-            print("If I had to say one, I would say Somalia is the worst country to go. As it is a very poor country, underdeveloped, with a very high criminal rate and risk of dying!")    
+            print("If I had to say one, I would say Somalia is the worst country to go. It is a very poor country, underdeveloped, with a very high criminal rate and risk of dying!")
     elif (len(countries) == 1):
-        print(check_country(basic_info, countries[0], parameters))
+        check_country(basic_info, countries[0], parameters)
     elif (len(countries) > 1):
         for country in countries:
-            print(check_country(basic_info, country, parameters))
+            check_country(basic_info, country, parameters)
     elif (len(continents) == 1):
-        # same as countries but looking through countries in a continent
-        print("texto de ejemplo")
+        #TODO(For phase 3): same as countries but looking through countries in a continent
+        print("Feature yet to implement")
     elif (len(continents) > 1):
-        for continent in continents: 
-            print("texto de ejemplo")      
+        #TODO(For phase 3): same as above for n continents
+        print("Feature yet to implement")
     else:
-        print("Please develop more")
+        print("I can't understand. Please reformulate or elaborate more your words.")
                      
 def main():
 
@@ -206,18 +205,15 @@ def main():
     # Words that might be used for looking for a country based on a parameter or ask for the information of the country parameter
     visit_words = ["recommend", "go", "visit", "place"]
     key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor", "information", "tell"]
-    df = pd.read_csv("Datasets/3. All Countries.csv")
-    data = df.to_dict(orient='records')
 
     # Group data into list of dictionaries based on the first letter    
-    basic_info = BasicInfo(data)
+    basic_info = BasicInfo()
 
     while True:    
-        # Read the data
+        # Read and process input (tokenization, filtering and lemmatization)
         data = input("\n> ")
         # Process the text
         processed_data = process_text(data.lower())
-        print(processed_data)
 
         # Check text
         countries = []
@@ -227,11 +223,10 @@ def main():
         negative = 0
         finish = 0
         go = 0
-        for word in processed_data:
+        for i, word in enumerate(processed_data):
             for d in basic_info.countries_data[word[0].upper()]:
-                if d["country"].lower() == word or word in d["country"].lower():
-                    countries.append(word)
-
+                if d["country"].lower() == word or (word in d["country"].lower() and i+1 < len(processed_data) and processed_data[i+1] in d["country"].lower()):
+                    countries.append(d["country"].lower())
             for positive_word in positive_words:
                 if positive_word == word:
                     positive += 1
@@ -257,10 +252,13 @@ def main():
                 if exit_word == word:
                     finish = 1
 
-        evaluate_data(basic_info, countries, continents, go, parameters, positive, negative)
         if finish == 1:
             print("Bye, have a great day!")
             return
+        evaluate_data(basic_info, countries, continents, go, parameters, positive, negative)
 
 if __name__ == "__main__":
+    nltk.download('punkt')
+    nltk.download('stopwords')
+    nltk.download('wordnet')
     main()
