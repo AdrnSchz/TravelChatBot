@@ -17,6 +17,7 @@ class BasicInfo:
     def initialize_data(self, data):
         df = pd.read_csv("Datasets/2. cost_of_living.csv")
         cost_living = df.to_dict(orient='records')
+        #i = 0
 
         df = pd.read_csv("Datasets/4. World Crime Index.csv")
         crime_index = df.to_dict(orient='records')
@@ -25,8 +26,10 @@ class BasicInfo:
 
             for c in cost_living:
                 if c["country"].lower() in d["country"].lower():
+                    #i += 1
                     d["cost_of_living"] = c["cost_of_living"]
                     d["global_rank"] = c["global_rank"]
+                    #print(i, ". ", d["country"], "has ", d["cost_of_living"], "cost of living and is in the ", d["global_rank"], "global rank")
                     break
 
             i = 0
@@ -45,9 +48,8 @@ class BasicInfo:
             if first_letter not in self.countries_data:
                 self.countries_data[first_letter] = []
             self.countries_data[first_letter].append(d)
-
-            if "gdp" in d and not math.isnan(d["gdp"]):
-                self.gdp_avg += d["gdp"]
+            if "gdp" in d and not math.isnan(d["gdp"]) and "population" in d and not math.isnan(d["population"]):
+                self.gdp_avg += d["gdp"] / d["population"]
                 self.num_countries += 1
             if "crime_rate" in d:
                 self.crime_rate_avg += d["crime_rate"]
@@ -108,7 +110,7 @@ def joinStrings(strings):
 def check_country(basic_info, country, parameters):
     if (len(parameters) == 0):
         country_info = basic_info.get_country(country)
-        if country_info["gdp"] >= basic_info.gdp_avg:
+        if country_info["gdp"] / country_info["population"] >= basic_info.gdp_avg:
             print("I would recommend you to visit", country_info["country"], ", as it is a rich country")
         else:
             print("I wouldn't recommend you to visit", country_info["country"], ", as it is a poor country")
@@ -128,7 +130,7 @@ def check_country(basic_info, country, parameters):
                 strings.append(" uses " + country_info["currency"] + " as its currency")
             elif unique[1] and (parameter == "rich" or parameter == "poor"):
                 unique[1] = False
-                if country_info["gdp"] >= basic_info.gdp_avg:
+                if country_info["gdp"] / country_info["population"] >= basic_info.gdp_avg:
                     strings.append(" is a rich country")
                 else:
                     strings.append(" is a poor country")
