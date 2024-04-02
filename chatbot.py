@@ -5,11 +5,13 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 
-class Basic_info:
+class BasicInfo:
     def __init__(self, data):
         self.countries_data = {}
         self.gdp_avg = 0
+        self.crime_rate_avg = 0
         self.num_countries = 0
+        self.num_countries_cr = 0
         self.initialize_data(data)
 
     def initialize_data(self, data):
@@ -19,7 +21,11 @@ class Basic_info:
         other_info = df.to_dict(orient='records')
         i = 0
 
+        df = pd.read_csv("Datasets/4. World Crime Index.csv")
+        crime_index = df.to_dict(orient='records')
+
         for d in data:
+
             for c in cost_living:
                 if c["country"].lower() == d["country"].lower() or c["country"].lower() in d["country"].lower() or d["country"].lower() in c["country"].lower():
                     #i += 1
@@ -38,6 +44,19 @@ class Basic_info:
                     print(i, ". ", d["country"], "has an area of", d["area"], " square km and it has a ", d["coastline"], "coast/area ratio. Moreover, the ", 
                     d["literacy"], " % of the population is literated and there are ", d["phones"], " phones per 1000 people. Finally, they have a climate of ", d["climate"])
                     break
+
+            i = 0
+            d["crime_rate"] = 0
+            for c in crime_index:
+                if d["country"].lower() in c["City"].lower().split(',')[1]:
+                    d["crime_rate"] += c["Crime Index"]
+                    i = i + 1
+
+            if i == 0:
+                d["crime_rate"] = -1
+            else:
+                d["crime_rate"] /= i
+
             first_letter = d["country"][0]
             if first_letter not in self.countries_data:
                 self.countries_data[first_letter] = []
@@ -45,8 +64,12 @@ class Basic_info:
             if "gdp" in d and not math.isnan(d["gdp"]) and "population" in d and not math.isnan(d["population"]):
                 self.gdp_avg += d["gdp"] / d["population"]
                 self.num_countries += 1
+            if "crime_rate" in d:
+                self.crime_rate_avg += d["crime_rate"]
+                self.num_countries_cr += 1
             
-        self.gdp_avg = self.gdp_avg / self.num_countries
+        self.gdp_avg /= self.num_countries
+        self.crime_rate_avg /= self.num_countries_cr
     
     def get_country(self, country):
         for initial_letter, countries_list in self.countries_data.items():
@@ -93,16 +116,16 @@ def joinStrings(strings):
         strings[len(strings) - 1] = "."
     else:
         strings.append(".")
-    strings[len(strings) - 3] = " and"
+    #strings[len(strings) - 3] = " and"
     separator = ""
     return separator.join(strings)
 
 def printCountryInfo(basic_info, country):
     country_info = basic_info.get_country(country)
     if country_info["gdp"] / country_info["population"] >= basic_info.gdp_avg:
-        print("I would recommed you to visit", country_info["country"], ", as it is a rich country and...")
+        print("I would recommed you to visit", country_info["country"], ", as it is a rich country")
     else:
-        print("I wouldn't recommed you to visit", country_info["country"], ", as it is a poor country and...")
+        print("I wouldn't recommed you to visit", country_info["country"], ", as it is a poor country")
     print("It is located in", country_info["region"], "and their main language is. It has a population of", country_info["population"], 
                 "people, they use the ", country_info["currency"], " as its currency and its ", country_info["title"].lower(), " is ", 
                 country_info["political_leader"])
@@ -110,7 +133,6 @@ def check_country(basic_info, country, parameters):
     if (len(parameters) == 0):
         printCountryInfo(basic_info, country)
         country_info = basic_info.get_country(country)
-        
     else:
         unique = [True, True, True, True, True, True, True]
         country_info = basic_info.get_country(country)
@@ -119,6 +141,8 @@ def check_country(basic_info, country, parameters):
         coma = True
         for parameter in parameters:
             coma = True
+
+            #key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor"]
         
             if unique[0] and parameter == "currency":
                 unique[0] = False
@@ -129,6 +153,16 @@ def check_country(basic_info, country, parameters):
                     strings.append(" is a rich country")
                 else:
                     strings.append(" is a poor country")
+            elif unique[2] and (parameter == "danger" or parameter == "secur" or parameter == "safe"):
+                unique[2] = False
+                print(basic_info.crime_rate_avg) ####
+                print(country_info["crime_rate"]) ###
+                if country_info["crime_rate"] >= basic_info.crime_rate_avg:
+                    strings.append(" has a high crime rate")
+                elif country_info["crime_rate"] != -1:
+                    strings.append(" has a low crime rate")
+                else:
+                    strings.append(" does not have enough crime statistics to determine whether it is safe or not")
             else:
                 coma = False
             if coma:
@@ -162,6 +196,7 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
         print("Please develop more")
                      
 def main():
+
     exit_words = ["exit", "quit", "bye", "goodbye"]
     negative_words = ["worst", "awful",'bad', "terrible"]
     positive_words = ["best","excellent", "amazing", "incredible", "nice", "wonderful"]
@@ -171,9 +206,9 @@ def main():
     key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor", "information", "tell"]
     df = pd.read_csv("Datasets/3. All Countries.csv")
     data = df.to_dict(orient='records')
-    
+
     # Group data into list of dictionaries based on the first letter    
-    basic_info = Basic_info(data)
+    basic_info = BasicInfo(data)
 
     while True:    
         # Read the data
@@ -212,8 +247,8 @@ def main():
                     go = 1
 
             for key_word in key_words:
-                if key_word == word:
-                    parameters.append(word)
+                if key_word in word:
+                    parameters.append(key_word)
 
             # Last checking to be made
             for exit_word in exit_words:
