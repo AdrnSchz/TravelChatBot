@@ -42,7 +42,7 @@ class BasicInfo:
                     break
             for c in global_info:
                 if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
-                    d["language"] = c["Official language"]
+                    d["language"] = c["Language"]
                     break
 
             j = 0
@@ -50,12 +50,12 @@ class BasicInfo:
             for c in crime_index:
                 if d["country"].lower() in c["City"].lower().rsplit(',', 1)[1]:
                     d["crime_rate"] += c["Crime Index"]
-                    i += 1
+                    j += 1
 
-            if i == 0:
+            if j == 0:
                 d["crime_rate"] = -1
             else:
-                d["crime_rate"] /= i
+                d["crime_rate"] /= j
                 self.crime_indices.append(d["crime_rate"])
 
             # Countries are grouped by their first letter to allow faster access and search later
