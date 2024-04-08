@@ -120,6 +120,8 @@ def join_strings(strings):
         strings[len(strings) - 1] = "."
     else:
         strings.append(".")
+    if (strings[len(strings) - 3] == ','):
+        strings[len(strings) - 3] = " and"
     separator = ""
     return separator.join(strings)
 
@@ -154,7 +156,7 @@ def check_country(basic_info, country, parameters):
                     strings.append(" is a rich country")
                 else:
                     strings.append(" is a poor country")
-            elif unique[2] and (parameter == "danger" or parameter == "secur" or parameter == "safe"):
+            elif unique[2] and (parameter == "danger" or parameter == "secure" or parameter == "safe"):
                 unique[2] = False
                 if abs(basic_info.crime_rate_avg - country_info["crime_rate"]) < 10:
                     strings.append(" has a medium crime rate")
@@ -204,7 +206,7 @@ def main():
     continent_words = ["europe", "asia", "africa", "america", "oceania"]
     # Words that might be used for looking for a country based on a parameter or ask for the information of the country parameter
     visit_words = ["recommend", "go", "visit", "place"]
-    key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor", "information", "tell"]
+    key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor", "information"]
 
     # Group data into list of dictionaries based on the first letter    
     basic_info = BasicInfo()
