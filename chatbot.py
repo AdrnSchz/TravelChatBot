@@ -45,21 +45,20 @@ class BasicInfo:
                     break
             for c in global_info:
                 if c["Country"].lower() == d["country"].lower() or c["Country"].lower() in d["country"].lower() or d["country"].lower() in c["Country"].lower():
-                    d["language"] = c["Official language"]
+                    d["language"] = c["Language"]
                     break
-            
-            # Extract country's average crime rate with rates of its cities
-            i = 0
+
+            j = 0
             d["crime_rate"] = 0
             for c in crime_index:
                 if d["country"].lower() in c["City"].lower().rsplit(',', 1)[1]:
                     d["crime_rate"] += c["Crime Index"]
-                    i += 1
+                    j += 1
 
-            if i == 0:
+            if j == 0:
                 d["crime_rate"] = -1
             else:
-                d["crime_rate"] /= i
+                d["crime_rate"] /= j
                 self.crime_indices.append(d["crime_rate"])
 
             # Countries are grouped by their first letter to allow faster access and search later
@@ -131,6 +130,8 @@ def join_strings(strings):
         strings[len(strings) - 1] = "."
     else:
         strings.append(".")
+    if (strings[len(strings) - 3] == ','):
+        strings[len(strings) - 3] = " and"
     separator = ""
     return separator.join(strings)
 
@@ -165,7 +166,7 @@ def check_country(basic_info, country, parameters):
                     strings.append(" is a rich country")
                 else:
                     strings.append(" is a poor country")
-            elif unique[2] and (parameter == "danger" or parameter == "secur" or parameter == "safe"):
+            elif unique[2] and (parameter == "danger" or parameter == "secure" or parameter == "safe"):
                 unique[2] = False
                 if abs(basic_info.crime_rate_avg - country_info["crime_rate"]) < 10:
                     strings.append(" has a medium crime rate")
@@ -197,6 +198,12 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
     elif (len(countries) > 1):
         for country in countries:
             check_country(basic_info, country, parameters)
+    elif (len(continents) == 1):
+        #TODO(For phase 3): same as countries but looking through countries in a continent
+        print("Feature yet to implement")
+    elif (len(continents) > 1):
+        #TODO(For phase 3): same as above for n continents
+        print("Feature yet to implement")
     else:
         print("I can't understand. Please reformulate or elaborate more your words.")
 
@@ -208,7 +215,7 @@ def main():
     continent_words = ["europe", "asia", "africa", "america", "oceania"]
     # Words that might be used for looking for a country based on a parameter or ask for the information of the country parameter
     visit_words = ["recommend", "go", "visit", "place"]
-    key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor", "information", "tell"]
+    key_words = ["currency", "located", "urban", "rural", "develop", "danger", "secure", "safe", "expenses", "rich" , "poor", "information"]
 
     # Group data into list of dictionaries based on the first letter    
     basic_info = BasicInfo()
