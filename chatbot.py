@@ -5,6 +5,9 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 
+qualifiers = {}
+modifiers = {}
+
 class BasicInfo:
     def __init__(self):
         self.countries_data = {}
@@ -116,6 +119,13 @@ def process_text(text):
     filtered = filter_stop_words(tokens)
     return lemmatize(filtered)
 
+def csv_to_asso_arr(path):
+    df_words = pd.read_csv(path)
+    asso_arr = {}
+    for i in range(len(df_words.index)):
+        asso_arr[df_words.iat[i, 0]] = df_words.iat[i, 1]
+    return asso_arr
+
 def join_strings(strings):
     if strings[len(strings) - 1] == ",":
         strings[len(strings) - 1] = "."
@@ -174,7 +184,6 @@ def check_country(basic_info, country, parameters):
 # Evaluate data taken from the input text
 def evaluate_data(basic_info, countries, continents, go, parameters, positive, negative):
     is_positive = positive - negative
-    # TODO: Should make a function to grade countries and be able to order them from best to worst
 
     if (go == 0 and len(countries) == 0 and len(continents) == 0 and len(parameters) == 0):
         print("I can't understand. Please reformulate or elaborate more your words.")
@@ -188,15 +197,9 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
     elif (len(countries) > 1):
         for country in countries:
             check_country(basic_info, country, parameters)
-    elif (len(continents) == 1):
-        #TODO: same as countries but looking through countries in a continent
-        print("a")
-    elif (len(continents) > 1):
-        #TODO: for continent in continents
-        print("a")
     else:
         print("I can't understand. Please reformulate or elaborate more your words.")
-                     
+
 def main():
 
     exit_words = ["exit", "quit", "bye", "goodbye"]
@@ -209,6 +212,9 @@ def main():
 
     # Group data into list of dictionaries based on the first letter    
     basic_info = BasicInfo()
+
+    qualifiers = csv_to_asso_arr('Datasets/qualifier_ratings.csv')
+    modifiers  = csv_to_asso_arr('Datasets/modifier_ratings.csv')
 
     while True:    
         # Read and process input (tokenization, filtering and lemmatization)
@@ -224,6 +230,7 @@ def main():
         negative = 0
         finish = 0
         go = 0
+
         for i, word in enumerate(processed_data):
             for d in basic_info.countries_data[word[0].upper()]:
                 if d["country"].lower() == word or (word in d["country"].lower() and i+1 < len(processed_data) and processed_data[i+1] in d["country"].lower()):
