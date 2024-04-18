@@ -6,6 +6,7 @@ The steps to execute the chatbot are:
 2. Set the project's directory as working/current directory (using cd)
 3. Execute in a terminal prompt using "python chatbot.py"
 
+
 During the first execution, required packages will be downloaded. The chatbot will not be available until packages are successfully downloaded.
 Once it is running, simply input any desired query and a response will be given.
 

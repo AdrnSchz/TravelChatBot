@@ -2,6 +2,7 @@ import math
 import pandas as pd
 import string
 import nltk
+from nltk.tag import pos_tag
 from nltk.corpus import stopwords
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 
@@ -18,15 +19,15 @@ class BasicInfo:
         self.initialize_data()
 
     def initialize_data(self):
-        df = pd.read_csv("Datasets/3. All Countries.csv")
+        df = pd.read_csv("Datasets/general_information/3. All Countries.csv")
         countries_data = df.to_dict(orient='records')
-        df = pd.read_csv("Datasets/0. Global Country Information Dataset 2023.csv")
+        df = pd.read_csv("Datasets/general_information/0. Global Country Information Dataset 2023.csv")
         global_info = df.to_dict(orient='records')
-        df = pd.read_csv("Datasets/1. Countries of the World.csv")
+        df = pd.read_csv("Datasets/general_information/1. Countries of the World.csv")
         other_info = df.to_dict(orient='records')
-        df = pd.read_csv("Datasets/2. cost_of_living.csv")
+        df = pd.read_csv("Datasets/general_information/2. cost_of_living.csv")
         cost_living = df.to_dict(orient='records')
-        df = pd.read_csv("Datasets/4. World Crime Index.csv")
+        df = pd.read_csv("Datasets/general_information/4. World Crime Index.csv")
         crime_index = df.to_dict(orient='records')
 
         for d in countries_data:
@@ -84,6 +85,10 @@ class BasicInfo:
                 if country_info["country"].lower() == country:
                     return country_info
         
+class Country:
+    def __init__(self, name):
+        self.name = name
+        self.attributes = {}
 
 # Tokenize and remove punctuation
 def tokenize(text):
@@ -117,6 +122,14 @@ def process_text(text):
     # If filter stop words, it cannot recognize a question
     filtered = filter_stop_words(tokens)
     return lemmatize(filtered)
+
+def process_text_tags(text):
+    tokens = tokenize(text)
+    tagged_tokens = pos_tag(tokens)
+    tags = [pos for _, pos in tagged_tokens]
+
+    return lemmatize(list(tokens)), tags
+
 
 def csv_to_asso_arr(path):
     df_words = pd.read_csv(path)
@@ -220,14 +233,18 @@ def main():
     # Group data into list of dictionaries based on the first letter    
     basic_info = BasicInfo()
 
-    qualifiers = csv_to_asso_arr('Datasets/qualifier_ratings.csv')
-    modifiers  = csv_to_asso_arr('Datasets/modifier_ratings.csv')
+    qualifiers = csv_to_asso_arr('Datasets/dictionaries/qualifier_ratings.csv')
+    modifiers  = csv_to_asso_arr('Datasets/dictionaries/modifier_ratings.csv')
 
     while True:    
         # Read and process input (tokenization, filtering and lemmatization)
         data = input("\n> ")
         # Process the text
         processed_data = process_text(data.lower())
+        words, tags = process_text_tags(data.lower())
+        
+        for i in range (len(words)):
+            print(words[i], " ", tags[i])
 
         # Check text
         countries = []
@@ -276,4 +293,5 @@ if __name__ == "__main__":
     nltk.download('punkt')
     nltk.download('stopwords')
     nltk.download('wordnet')
+    nltk.download("averaged_perceptron_tagger")
     main()

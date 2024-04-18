@@ -1,0 +1,197 @@
+Afghanistan - 12°C
+Albania - 15°C
+Algeria - 22°C
+Andorra - 9°C
+Angola - 24°C
+Antigua and Barbuda - 27°C
+Argentina - 17°C
+Armenia - 11°C
+Australia - 22°C
+Austria - 7°C
+Azerbaijan - 14°C
+Bahamas - 25°C
+Bahrain - 28°C
+Bangladesh - 26°C
+Barbados - 27°C
+Belarus - 6°C
+Belgium - 10°C
+Belize - 25°C
+Benin - 27°C
+Bhutan - 10°C
+Bolivia - 18°C
+Bosnia and Herzegovina - 11°C
+Botswana - 20°C
+Brazil - 24°C
+Brunei - 28°C
+Bulgaria - 11°C
+Burkina Faso - 28°C
+Burundi - 20°C
+Cabo Verde - 23°C
+Cambodia - 27°C
+Cameroon - 24°C
+Canada - 1°C
+Central African Republic - 25°C
+Chad - 27°C
+Chile - 14°C
+China - 12°C
+Colombia - 24°C
+Comoros - 27°C
+Congo (Congo-Brazzaville) - 24°C
+Costa Rica - 24°C
+Croatia - 12°C
+Cuba - 25°C
+Cyprus - 24°C
+Czechia (Czech Republic) - 8°C
+Democratic Republic of the Congo - 24°C
+Denmark - 8°C
+Djibouti - 30°C
+Dominica - 26°C
+Dominican Republic - 25°C
+Ecuador - 22°C
+Egypt - 22°C
+El Salvador - 24°C
+Equatorial Guinea - 26°C
+Eritrea - 22°C
+Estonia - 4°C
+Eswatini (fmr. "Swaziland") - 20°C
+Ethiopia - 20°C
+Fiji - 26°C
+Finland - 3°C
+France - 12°C
+Gabon - 26°C
+Gambia - 27°C
+Georgia - 11°C
+Germany - 9°C
+Ghana - 27°C
+Greece - 17°C
+Grenada - 27°C
+Guatemala - 22°C
+Guinea - 27°C
+Guinea-Bissau - 27°C
+Guyana - 27°C
+Haiti - 25°C
+Honduras - 25°C
+Hungary - 10°C
+Iceland - 5°C
+India - 25°C
+Indonesia - 26°C
+Iran - 16°C
+Iraq - 22°C
+Ireland - 9°C
+Israel - 24°C
+Italy - 15°C
+Ivory Coast - 27°C
+Jamaica - 27°C
+Japan - 16°C
+Jordan - 22°C
+Kazakhstan - 5°C
+Kenya - 20°C
+Kiribati - 28°C
+Kosovo - 10°C
+Kuwait - 28°C
+Kyrgyzstan - 6°C
+Laos - 24°C
+Latvia - 6°C
+Lebanon - 22°C
+Lesotho - 17°C
+Liberia - 27°C
+Libya - 26°C
+Liechtenstein - 6°C
+Lithuania - 6°C
+Luxembourg - 9°C
+Madagascar - 23°C
+Malawi - 20°C
+Malaysia - 27°C
+Maldives - 28°C
+Mali - 27°C
+Malta - 19°C
+Marshall Islands - 27°C
+Mauritania - 27°C
+Mauritius - 24°C
+Mexico - 22°C
+Micronesia - 27°C
+Moldova - 9°C
+Monaco - 16°C
+Mongolia - 0°C
+Montenegro - 13°C
+Morocco - 20°C
+Mozambique - 24°C
+Myanmar (formerly Burma) - 25°C
+Namibia - 20°C
+Nauru - 28°C
+Nepal - 15°C
+Netherlands - 10°C
+New Zealand - 13°C
+Nicaragua - 27°C
+Niger - 27°C
+Nigeria - 27°C
+North Korea - 4°C
+North Macedonia - 11°C
+Norway - 3°C
+Oman - 28°C
+Pakistan - 25°C
+Palau - 27°C
+Palestine State - 24°C
+Panama - 27°C
+Papua New Guinea - 26°C
+Paraguay - 23°C
+Peru - 20°C
+Philippines - 27°C
+Poland - 7°C
+Portugal - 17°C
+Qatar - 28°C
+Romania - 10°C
+Russia - 3°C
+Rwanda - 20°C
+Saint Kitts and Nevis - 27°C
+Saint Lucia - 27°C
+Saint Vincent and the Grenadines - 27°C
+Samoa - 27°C
+San Marino - 15°C
+Sao Tome and Principe - 26°C
+Saudi Arabia - 29°C
+Senegal - 27°C
+Serbia - 11°C
+Seychelles - 27°C
+Sierra Leone - 27°C
+Singapore - 27°C
+Slovakia - 7°C
+Slovenia - 9°C
+Solomon Islands - 27°C
+Somalia - 27°C
+South Africa - 17°C
+South Korea - 12°C
+South Sudan - 27°C
+Spain - 16°C
+Sri Lanka - 27°C
+Sudan - 27°C
+Suriname - 27°C
+Sweden - 4°C
+Switzerland - 7°C
+Syria - 22°C
+Taiwan - 24°C
+Tajikistan - 3°C
+Tanzania - 23°C
+Thailand - 27°C
+Timor-Leste - 26°C
+Togo - 27°C
+Tonga - 26°C
+Trinidad and Tobago - 27°C
+Tunisia - 20°C
+Turkey - 14°C
+Turkmenistan - 12°C
+Tuvalu - 28°C
+Uganda - 20°C
+Ukraine - 7°C
+United Arab Emirates - 28°C
+United Kingdom - 10°C
+United States - 12°C
+Uruguay - 17°C
+Uzbekistan - 12°C
+Vanuatu - 26°C
+Vatican City - 15°C
+Venezuela - 25°C
+Vietnam - 25°C
+Yemen - 28°C
+Zambia - 22°C
+Zimbabwe - 22°C

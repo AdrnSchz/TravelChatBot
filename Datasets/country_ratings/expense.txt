@@ -1,0 +1,197 @@
+Afghanistan - 0.3
+Albania - 0.4
+Algeria - 0.4
+Andorra - 0.6
+Angola - 0.5
+Antigua and Barbuda - 0.7
+Argentina - 0.6
+Armenia - 0.4
+Australia - 0.8
+Austria - 0.8
+Azerbaijan - 0.5
+Bahamas - 0.7
+Bahrain - 0.7
+Bangladesh - 0.3
+Barbados - 0.7
+Belarus - 0.4
+Belgium - 0.8
+Belize - 0.6
+Benin - 0.3
+Bhutan - 0.5
+Bolivia - 0.5
+Bosnia and Herzegovina - 0.4
+Botswana - 0.6
+Brazil - 0.7
+Brunei - 0.8
+Bulgaria - 0.5
+Burkina Faso - 0.3
+Burundi - 0.3
+Cabo Verde - 0.5
+Cambodia - 0.5
+Cameroon - 0.4
+Canada - 0.8
+Central African Republic - 0.3
+Chad - 0.3
+Chile - 0.6
+China - 0.7
+Colombia - 0.6
+Comoros - 0.4
+Congo (Congo-Brazzaville) - 0.4
+Costa Rica - 0.6
+Croatia - 0.7
+Cuba - 0.5
+Cyprus - 0.7
+Czechia (Czech Republic) - 0.8
+Democratic Republic of the Congo - 0.3
+Denmark - 0.8
+Djibouti - 0.4
+Dominica - 0.6
+Dominican Republic - 0.6
+Ecuador - 0.6
+Egypt - 0.6
+El Salvador - 0.5
+Equatorial Guinea - 0.7
+Eritrea - 0.3
+Estonia - 0.7
+Eswatini (fmr. "Swaziland") - 0.6
+Ethiopia - 0.4
+Fiji - 0.6
+Finland - 0.7
+France - 0.9
+Gabon - 0.6
+Gambia - 0.4
+Georgia - 0.5
+Germany - 0.8
+Ghana - 0.5
+Greece - 0.7
+Grenada - 0.7
+Guatemala - 0.5
+Guinea - 0.3
+Guinea-Bissau - 0.3
+Guyana - 0.5
+Haiti - 0.4
+Honduras - 0.5
+Hungary - 0.7
+Iceland - 0.8
+India - 0.6
+Indonesia - 0.6
+Iran - 0.5
+Iraq - 0.4
+Ireland - 0.8
+Israel - 0.8
+Italy - 0.8
+Ivory Coast - 0.4
+Jamaica - 0.7
+Japan - 0.8
+Jordan - 0.6
+Kazakhstan - 0.6
+Kenya - 0.5
+Kiribati - 0.4
+Kosovo - 0.5
+Kuwait - 0.7
+Kyrgyzstan - 0.4
+Laos - 0.5
+Latvia - 0.6
+Lebanon - 0.7
+Lesotho - 0.4
+Liberia - 0.4
+Libya - 0.5
+Liechtenstein - 0.7
+Lithuania - 0.6
+Luxembourg - 0.8
+Madagascar - 0.5
+Malawi - 0.4
+Malaysia - 0.6
+Maldives - 0.7
+Mali - 0.4
+Malta - 0.7
+Marshall Islands - 0.4
+Mauritania - 0.4
+Mauritius - 0.6
+Mexico - 0.7
+Micronesia - 0.4
+Moldova - 0.4
+Monaco - 0.9
+Mongolia - 0.5
+Montenegro - 0.5
+Morocco - 0.6
+Mozambique - 0.5
+Myanmar (formerly Burma) - 0.5
+Namibia - 0.6
+Nauru - 0.3
+Nepal - 0.5
+Netherlands - 0.8
+New Zealand - 0.7
+Nicaragua - 0.5
+Niger - 0.3
+Nigeria - 0.4
+North Korea - 0.3
+North Macedonia - 0.5
+Norway - 0.8
+Oman - 0.7
+Pakistan - 0.5
+Palau - 0.6
+Palestine State - 0.5
+Panama - 0.6
+Papua New Guinea - 0.5
+Paraguay - 0.5
+Peru - 0.6
+Philippines - 0.6
+Poland - 0.7
+Portugal - 0.7
+Qatar - 0.7
+Romania - 0.6
+Russia - 0.7
+Rwanda - 0.4
+Saint Kitts and Nevis - 0.7
+Saint Lucia - 0.7
+Saint Vincent and the Grenadines - 0.7
+Samoa - 0.5
+San Marino - 0.7
+Sao Tome and Principe - 0.4
+Saudi Arabia - 0.7
+Senegal - 0.4
+Serbia - 0.6
+Seychelles - 0.7
+Sierra Leone - 0.4
+Singapore - 0.9
+Slovakia - 0.7
+Slovenia - 0.7
+Solomon Islands - 0.5
+Somalia - 0.3
+South Africa - 0.6
+South Korea - 0.8
+South Sudan - 0.4
+Spain - 0.8
+Sri Lanka - 0.6
+Sudan - 0.4
+Suriname - 0.6
+Sweden - 0.8
+Switzerland - 0.9
+Syria - 0.5
+Taiwan - 0.7
+Tajikistan - 0.4
+Tanzania - 0.5
+Thailand - 0.7
+Timor-Leste - 0.4
+Togo - 0.4
+Tonga - 0.5
+Trinidad and Tobago - 0.6
+Tunisia - 0.6
+Turkey - 0.7
+Turkmenistan - 0.5
+Tuvalu - 0.3
+Uganda - 0.4
+Ukraine - 0.5
+United Arab Emirates - 0.8
+United Kingdom - 0.8
+United States - 0.9
+Uruguay - 0.6
+Uzbekistan - 0.5
+Vanuatu - 0.4
+Vatican City - 0.9
+Venezuela - 0.5
+Vietnam - 0.5
+Yemen - 0.4
+Zambia - 0.5
+Zimbabwe - 0.4
