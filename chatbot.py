@@ -1,4 +1,5 @@
 import math
+import csv
 import pandas as pd
 import string
 import nltk
@@ -89,6 +90,44 @@ class Country:
     def __init__(self, name):
         self.name = name
         self.attributes = {}
+
+def txt_to_csv_column(txt_name):
+
+    target_column_index = 0
+    path_split = (txt_name.lower()).split('.')
+    column_name = (path_split[0]).capitalize()
+    txt_path = 'Datasets/country_ratings/' + txt_name
+
+    ratings = []
+    with open(txt_path, 'r') as file:
+        lines = file.readlines()
+
+    for line in lines:
+        line_split = line.split(' - ')
+        ratings.append(line_split[1].replace('\r', '').replace('\n', ''))
+
+    csv_path = 'Datasets/country_attributes.csv'
+    with open(csv_path, 'r') as file:
+        reader = csv.reader(file)
+        header = next(reader)
+        try:
+            target_column_index = header.index(column_name)
+            print(target_column_index, ' ', txt_path)
+        except ValueError:
+            print('no column found with the name', column_name)
+            return
+
+    rows = []
+    with open(csv_path, 'r') as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+
+    for i in range(len(ratings)):
+        rows[i+1][target_column_index] =  ratings[i]
+
+    with open(csv_path, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
 
 # Tokenize and remove punctuation
 def tokenize(text):
@@ -221,6 +260,19 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
         print("I can't understand. Please reformulate or elaborate more your words.")
 
 def main():
+
+    txt_to_csv_column('coast.txt')
+    txt_to_csv_column('culture.txt')
+    txt_to_csv_column('expense.txt')
+    txt_to_csv_column('gastronomy.txt')
+    txt_to_csv_column('monuments.txt')
+    txt_to_csv_column('nature.txt')
+    txt_to_csv_column('nightlife.txt')
+    txt_to_csv_column('safety.txt')
+    txt_to_csv_column('shopping.txt')
+    txt_to_csv_column('skiing.txt')
+    txt_to_csv_column('temperature.txt')
+    txt_to_csv_column('tourism.txt')
 
     exit_words = ["exit", "quit", "bye", "goodbye"]
     negative_words = ["worst", "awful",'bad', "terrible"]

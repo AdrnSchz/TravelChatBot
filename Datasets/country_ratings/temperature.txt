@@ -36,7 +36,6 @@ Chile - 14°C
 China - 12°C
 Colombia - 24°C
 Comoros - 27°C
-Congo (Congo-Brazzaville) - 24°C
 Costa Rica - 24°C
 Croatia - 12°C
 Cuba - 25°C

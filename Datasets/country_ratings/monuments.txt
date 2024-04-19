@@ -36,7 +36,6 @@ Chile - 0.6
 China - 0.9
 Colombia - 0.7
 Comoros - 0.3
-Congo (Congo-Brazzaville) - 0.4
 Costa Rica - 0.5
 Croatia - 0.6
 Cuba - 0.6
