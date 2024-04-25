@@ -5,10 +5,15 @@ import string
 import nltk
 from nltk.tag import pos_tag
 from nltk.corpus import stopwords
+from collections import deque
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 
 qualifiers = {}
 modifiers = {}
+keys = []
+porter = PorterStemmer()
+countries_df = pd.DataFrame()
+all_countries = []
 
 class BasicInfo:
     def __init__(self):
@@ -112,7 +117,6 @@ def txt_to_csv_column(txt_name):
         header = next(reader)
         try:
             target_column_index = header.index(column_name)
-            print(target_column_index, ' ', txt_path)
         except ValueError:
             print('no column found with the name', column_name)
             return
@@ -125,9 +129,15 @@ def txt_to_csv_column(txt_name):
     for i in range(len(ratings)):
         rows[i+1][target_column_index] =  ratings[i]
 
-    with open(csv_path, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(rows)
+    try:
+        with open(csv_path, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(rows)
+    except:
+        print('unable to write in', csv_path)
+
+def countries(country, attribute):
+    return countries_df.at[country, attribute]
 
 # Tokenize and remove punctuation
 def tokenize(text):
@@ -141,7 +151,6 @@ def filter_stop_words(tokens):
 
 # Stemming
 def stem(tokens):
-    porter = PorterStemmer()
     words = []
     for w in tokens:
         words.append(porter.stem(w))
@@ -164,11 +173,8 @@ def process_text(text):
 
 def process_text_tags(text):
     tokens = tokenize(text)
-    tagged_tokens = pos_tag(tokens)
-    tags = [pos for _, pos in tagged_tokens]
-
-    return lemmatize(list(tokens)), tags
-
+    #Returns each token tagged
+    return pos_tag(tokens)
 
 def csv_to_asso_arr(path):
     df_words = pd.read_csv(path)
@@ -258,21 +264,8 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
         print("Feature yet to implement")
     else:
         print("I can't understand. Please reformulate or elaborate more your words.")
-
+'''
 def main():
-
-    txt_to_csv_column('coast.txt')
-    txt_to_csv_column('culture.txt')
-    txt_to_csv_column('expense.txt')
-    txt_to_csv_column('gastronomy.txt')
-    txt_to_csv_column('monuments.txt')
-    txt_to_csv_column('nature.txt')
-    txt_to_csv_column('nightlife.txt')
-    txt_to_csv_column('safety.txt')
-    txt_to_csv_column('shopping.txt')
-    txt_to_csv_column('skiing.txt')
-    txt_to_csv_column('temperature.txt')
-    txt_to_csv_column('tourism.txt')
 
     exit_words = ["exit", "quit", "bye", "goodbye"]
     negative_words = ["worst", "awful",'bad', "terrible"]
@@ -293,10 +286,6 @@ def main():
         data = input("\n> ")
         # Process the text
         processed_data = process_text(data.lower())
-        words, tags = process_text_tags(data.lower())
-        
-        for i in range (len(words)):
-            print(words[i], " ", tags[i])
 
         # Check text
         countries = []
@@ -340,6 +329,183 @@ def main():
             print("Bye, have a great day!")
             return
         evaluate_data(basic_info, countries, continents, go, parameters, positive, negative)
+'''
+
+'''
+def is_country(words, i):
+
+    for j in range(len(all_countries)):
+        # Check for multiple word countries (take into account words that have been removed)
+        #if words[i][0] in countries_df.iat[j, 0]:
+        if (all_countries[j]).lower() == words[i][0]:
+            return 1
+    return 0
+
+def curr_description_valid(description):
+    
+    for word in description:
+        if 'JJ' in word[1] or 'RB' in word[1] or word[0] == 'compare':
+            return True
+    return False
+
+def input_to_arrays(words):
+
+    descriptions = []
+    description = []
+    countrieses = []
+    countries = []
+
+    for i, word in enumerate(words):
+        # Choosing certain types of words to be filtered out to process less words
+        unimportant = ['CC', 'DT', 'EX', 'FW', 'IN', 'MD', 'VBZ']
+        if word[1] not in unimportant:
+            # Check if a country is being referenced
+            country_words = is_country(words, i)
+            if country_words != 0 or 'countr' in word[0] or 'nation' in word[0]:
+                #print('in first if', word[0])
+                if curr_description_valid(description):
+                    descriptions.append(description)
+                    description = []
+                elif not curr_description_valid(description) and len(description) > 0 and len(descriptions) > 0:
+                    descriptions[len(descriptions)-1] = descriptions[len(descriptions)-1] + description
+                    description = []
+                countries.append(word[0])
+            # Check if it is type of adjective, adverb or noun
+            elif 'JJ' in word[1] or 'RB' in word[1] or 'NN' in word[1] or 'VB' in word[1] or 'CD' == word[1] or word[0] == 'compare':
+                #print('in second if', word[0])
+                if len(countries) != 0:
+                    countrieses.append(countries)
+                    countries = []
+                description.append(word)
+            #else:
+                #print('discarded in second if:', word[0], word[1])
+        #else:
+            #print ('discarded in first if:', word[0])
+    if len(countries) > 0:
+        countrieses.append(countries)
+    if curr_description_valid(description):
+        descriptions.append(description)
+    elif not curr_description_valid(description) and len(description) > 0 and len(descriptions) > 0:
+        descriptions[len(descriptions)-1] = descriptions[len(descriptions)-1] + description
+    elif len(descriptions) == 0:
+        descriptions.append(description)
+
+    return countrieses, descriptions
+'''
+
+def is_country(words, i):
+    # TODO: Check for country names with more than one word (take into account words that have been removed)
+    # TODO: Check for variations of a country name
+    for j in range(len(all_countries)):
+        
+        #if words[i][0] in countries_df.iat[j, 0]:
+        if (all_countries[j]).lower() == words[i][0]:
+            return 1
+    return 0
+
+def add_pot_attr(attributes, word):
+
+    value = modifiers.get(word, -1000)
+    if value == -1000:
+        value = qualifiers.get(word, -1000)
+        if value == -1000:
+            with open('Datasets/dictionaries/attribute_synonyms.txt', 'r') as file:
+                lines = file.readlines()
+
+            print (lines)
+
+            for line in lines:
+                line = line.replace('\n', '').replace('\r', '')
+                attr_synonyms = line.split(', ')
+                print(attr_synonyms)
+                for i in range(len(attr_synonyms)):
+                    if word == attr_synonyms[i] or porter.stem(word) == porter.stem(attr_synonyms[i]):
+                        word = attr_synonyms[0]
+                        value = 0
+                        break
+                if value == 0:
+                    break
+
+            if value == -1000:
+                return False
+    
+    tuple = [word, value]
+    attributes.append(tuple)
+    return True
+
+
+def input_to_arrays(words):
+
+    #continents = []
+    countries = []
+    attributes = []
+    description = []
+
+    for i, word in enumerate(words):
+        # Choosing certain types of words to be filtered out to process less words
+        unimportant = ['CC', 'DT', 'EX', 'FW', 'IN', 'MD', 'VBZ', 'WDT', 'WP', 'WP$', 'WRP']
+        if word[1] not in unimportant:
+            # Check if a country is being referenced
+            country_words = 0
+            if 'NN' in word[1] or 'VB' == word[1]:
+                country_words = is_country(words, i)
+            if country_words > 0 or 'countr' in word[0] or 'nation' in word[0]:
+                countries.append(word[0])
+            elif 'JJ' in word[1] or 'RB' in word[1] or 'NN' in word[1] or 'VB' in word[1]:
+                if not add_pot_attr(attributes, word[0]):
+                    description.append(word)
+            else:
+                description.append(word)
+
+    return countries, attributes, description
+
+def main():
+
+    txt_to_csv_column('coast.txt')
+    txt_to_csv_column('culture.txt')
+    txt_to_csv_column('expense.txt')
+    txt_to_csv_column('gastronomy.txt')
+    txt_to_csv_column('monuments.txt')
+    txt_to_csv_column('nature.txt')
+    txt_to_csv_column('nightlife.txt')
+    txt_to_csv_column('safety.txt')
+    txt_to_csv_column('shopping.txt')
+    txt_to_csv_column('skiing.txt')
+    txt_to_csv_column('temperature.txt')
+    txt_to_csv_column('tourism.txt')
+    global countries_df
+    countries_df = pd.read_csv('Datasets/country_attributes.csv')
+    countries_df = countries_df.dropna()
+
+    global all_countries
+    all_countries = countries_df['Country'].values
+
+    continent_words = ["europe", "asia", "africa", "america", "oceania"]
+
+    global qualifiers
+    qualifiers = csv_to_asso_arr('Datasets/dictionaries/qualifier_ratings.csv')
+    global modifiers
+    modifiers  = csv_to_asso_arr('Datasets/dictionaries/modifier_ratings.csv')
+
+    while True:    
+        # Read and process input (tokenization, filtering and lemmatization)
+        data = input("\n> ")
+        # Process the text
+        words = process_text_tags(data.lower())
+
+        print(words)
+        print()
+
+        #continents = []
+        countries = []
+        attributes = []
+        description = []
+
+        countries, attributes, description = input_to_arrays(words)
+        print()
+        print(countries)
+        print(attributes)
+        print(description)
 
 if __name__ == "__main__":
     nltk.download('punkt')

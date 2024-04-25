@@ -1,0 +1,12 @@
+coast, beach, sea, seaside, coastline, seashore
+skiing, ski, snowboarding, snowboard, snow, ice
+nature, scenery, outdoors, landscape, rural, view
+safety, security, safeness, safe, -crime, -delinquency
+tourism
+culture
+gastronomy, food, cuisine, culinary, cooking
+nightlife, bar, pub, club, party
+shopping, shop, buy, buying, mall
+monuments, monument, history, museum
+temperature, weather, climate
+expense, expensive, cost, price
