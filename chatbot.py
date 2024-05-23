@@ -521,8 +521,10 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
             print('and have a better ', end='')
             print_inlist_format(attribute_names)
         print()
-    else :
-        print(countries_best[0]+' is '+comparison)
+    else:
+        print(countries_best[0]+' has the '+comparison+' at ', end='')
+        print_inlist_format(attribute_names)
+
 
 def process_input(countries, attributes, description):
 
@@ -533,10 +535,8 @@ def process_input(countries, attributes, description):
 
     comparison = ''
     for word in description:
-        if word[1] == 'RBR' or word[1] == 'JJR' or word[0] == 'nicer':
+        if word[1] == 'RBR' or word[1] == 'JJR' or word[1] == 'RBS' or word[1] == 'JJS' or word[0] == 'nicer' or word[0] == 'compare':
             comparison = word[0]
-        if word[1] == 'RBS' or word[1] == 'JJS':
-            comparison = 'the '+ word[0]
         
 
     if comparison != '':
