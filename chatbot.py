@@ -471,21 +471,37 @@ def print_inlist_format(list):
             print(', ', end='')
     return
 
-def attribute_comparison(countries, attributes, comparison):
+def attribute_comparison(countries, attributes, comparison, thereis_attr):
+
+    if not thereis_attr:
+        attributes = []
+        for attribute in countries_df.columns:
+            attributes.append([attribute, 0, 'ATR'])
+
+    no_actual_country = True
+    for country in countries:
+        if country != 'country':
+            no_actual_country = False
+    
+    if no_actual_country:
+        countries = list(countries_df.index)
+
     countries_best = []
     best = 0
 
     for country in countries:
         if country != 'country':
             i = 0
-            average_attributes_rating = 0
+            average_attributes_rating = 0.0
             for i, attribute in enumerate(attributes):
                 if attribute[2] == 'ATR':
-                    # TODO: take into account temperature
-                    average_attributes_rating += countries_df.loc[country, attribute[0]]
+                    if attribute[0] != 'temperature':
+                        average_attributes_rating += countries_df.loc[country, attribute[0]]
+                    else:
+                        # TODO: handle temperature
+                        i -= 1
                 
             average_attributes_rating = (average_attributes_rating / (i+1))
-            print(country+' '+str(average_attributes_rating))
 
             if average_attributes_rating > best:
                 countries_best = [country]
@@ -495,7 +511,7 @@ def attribute_comparison(countries, attributes, comparison):
 
     if len(countries_best) > 1:
         print_inlist_format(countries_best)
-        print('are equally good', end=' ')
+        print('are similarly good', end=' ')
 
         attribute_names = []
         for attribute in attributes:
@@ -510,19 +526,21 @@ def attribute_comparison(countries, attributes, comparison):
 
 def process_input(countries, attributes, description):
 
-    theres_attr = False
+    thereis_attr = False
     for word in attributes:
         if word[2] == 'ATR':
-            theres_attr = True
+            thereis_attr = True
 
     comparison = ''
     for word in description:
-        if word[1] == 'RBR' or word[1] == 'JJR':
+        if word[1] == 'RBR' or word[1] == 'JJR' or word[0] == 'nicer':
             comparison = word[0]
+        if word[1] == 'RBS' or word[1] == 'JJS':
+            comparison = 'the '+ word[0]
+        
 
-    if comparison != '' and theres_attr:
-        attribute_comparison(countries, attributes, comparison)
-    elif 
+    if comparison != '':
+        attribute_comparison(countries, attributes, comparison, thereis_attr)        
         
     return
 
