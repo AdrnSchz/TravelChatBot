@@ -8,13 +8,7 @@ from nltk.corpus import stopwords
 from collections import deque
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 
-qualifiers = {}
-modifiers = {}
-keys = []
-porter = PorterStemmer()
-countries_df = pd.DataFrame()
-all_countries = []
-
+'''
 class BasicInfo:
     def __init__(self):
         self.countries_data = {}
@@ -95,94 +89,8 @@ class Country:
     def __init__(self, name):
         self.name = name
         self.attributes = {}
-
-def txt_to_csv_column(txt_name):
-
-    target_column_index = 0
-    path_split = (txt_name.lower()).split('.')
-    column_name = (path_split[0]).capitalize()
-    txt_path = 'Datasets/country_ratings/' + txt_name
-
-    ratings = []
-    with open(txt_path, 'r') as file:
-        lines = file.readlines()
-
-    for line in lines:
-        line_split = line.split(' - ')
-        ratings.append(line_split[1].replace('\r', '').replace('\n', ''))
-
-    csv_path = 'Datasets/country_attributes.csv'
-    with open(csv_path, 'r') as file:
-        reader = csv.reader(file)
-        header = next(reader)
-        try:
-            target_column_index = header.index(column_name)
-        except ValueError:
-            print('no column found with the name', column_name)
-            return
-
-    rows = []
-    with open(csv_path, 'r') as file:
-        reader = csv.reader(file)
-        rows = list(reader)
-
-    for i in range(len(ratings)):
-        rows[i+1][target_column_index] =  ratings[i]
-
-    try:
-        with open(csv_path, 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerows(rows)
-    except:
-        print('unable to write in', csv_path)
-
-def countries(country, attribute):
-    return countries_df.at[country, attribute]
-
-# Tokenize and remove punctuation
-def tokenize(text):
-    tokens = nltk.word_tokenize(text)
-    return [w for w in tokens if not w in string.punctuation]
-
-# Filters out stop words
-def filter_stop_words(tokens):
-    stop_words = set(stopwords.words('english'))
-    return [w for w in tokens if not w.lower() in stop_words]
-
-# Stemming
-def stem(tokens):
-    words = []
-    for w in tokens:
-        words.append(porter.stem(w))
-    return words
-
-# Lemmatization
-def lemmatize(tokens):
-    lemmatizer = WordNetLemmatizer()
-    words = []
-    for w in tokens:
-        words.append(lemmatizer.lemmatize(w))
-    return words
-
-# Process the text(tokenize, remove punctuation, stop words, and stem/lemmatize)
-def process_text(text):
-    tokens = tokenize(text)
-    # If filter stop words, it cannot recognize a question
-    filtered = filter_stop_words(tokens)
-    return lemmatize(filtered)
-
-def process_text_tags(text):
-    tokens = tokenize(text)
-    #Returns each token tagged
-    return pos_tag(tokens)
-
-def csv_to_asso_arr(path):
-    df_words = pd.read_csv(path)
-    asso_arr = {}
-    for i in range(len(df_words.index)):
-        asso_arr[df_words.iat[i, 0]] = df_words.iat[i, 1]
-    return asso_arr
-
+'''
+'''
 def join_strings(strings):
     if strings[len(strings) - 1] == ",":
         strings[len(strings) - 1] = "."
@@ -264,7 +172,7 @@ def evaluate_data(basic_info, countries, continents, go, parameters, positive, n
         print("Feature yet to implement")
     else:
         print("I can't understand. Please reformulate or elaborate more your words.")
-'''
+
 def main():
 
     exit_words = ["exit", "quit", "bye", "goodbye"]
@@ -329,9 +237,7 @@ def main():
             print("Bye, have a great day!")
             return
         evaluate_data(basic_info, countries, continents, go, parameters, positive, negative)
-'''
 
-'''
 def is_country(words, i):
 
     for j in range(len(all_countries)):
@@ -393,6 +299,99 @@ def input_to_arrays(words):
     return countrieses, descriptions
 '''
 
+qualifiers = {}
+modifiers = {}
+keys = []
+porter = PorterStemmer()
+countries_df = pd.DataFrame()
+all_countries = []
+
+def txt_to_csv_column(txt_name):
+
+    target_column_index = 0
+    path_split = (txt_name.lower()).split('.')
+    column_name = (path_split[0]).capitalize()
+    txt_path = 'Datasets/country_ratings/' + txt_name
+
+    ratings = []
+    with open(txt_path, 'r') as file:
+        lines = file.readlines()
+
+    for line in lines:
+        line_split = line.split(' - ')
+        ratings.append(line_split[1].replace('\r', '').replace('\n', ''))
+
+    csv_path = 'Datasets/country_attributes.csv'
+    with open(csv_path, 'r') as file:
+        reader = csv.reader(file)
+        header = next(reader)
+        try:
+            target_column_index = header.index(column_name)
+        except ValueError:
+            print('no column found with the name', column_name)
+            return
+
+    rows = []
+    with open(csv_path, 'r') as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+
+    for i in range(len(ratings)):
+        rows[i+1][target_column_index] =  ratings[i]
+
+    try:
+        with open(csv_path, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(rows)
+    except:
+        print('unable to write in', csv_path)
+
+def countries(country, attribute):
+    return countries_df.at[country, attribute]
+
+# Tokenize and remove punctuation
+def tokenize(text):
+    tokens = nltk.word_tokenize(text)
+    return [w for w in tokens if not w in string.punctuation]
+
+# Filters out stop words
+def filter_stop_words(tokens):
+    stop_words = set(stopwords.words('english'))
+    return [w for w in tokens if not w.lower() in stop_words]
+
+# Stemming
+def stem(tokens):
+    words = []
+    for w in tokens:
+        words.append(porter.stem(w))
+    return words
+
+# Lemmatization
+def lemmatize(tokens):
+    lemmatizer = WordNetLemmatizer()
+    words = []
+    for w in tokens:
+        words.append(lemmatizer.lemmatize(w))
+    return words
+
+# Process the text(tokenize, remove punctuation, stop words, and stem/lemmatize)
+def process_text(text):
+    tokens = tokenize(text)
+    # If filter stop words, it cannot recognize a question
+    filtered = filter_stop_words(tokens)
+    return lemmatize(filtered)
+
+def process_text_tags(text):
+    tokens = tokenize(text)
+    return pos_tag(tokens)
+
+def csv_to_asso_arr(path):
+    df_words = pd.read_csv(path)
+    asso_arr = {}
+    for i in range(len(df_words.index)):
+        asso_arr[df_words.iat[i, 0]] = df_words.iat[i, 1]
+    return asso_arr
+
 def is_country(words, i):
     # TODO: Check for country names with more than one word (take into account words that have been removed)
     # TODO: Check for variations of a country name
@@ -406,22 +405,23 @@ def is_country(words, i):
 def add_pot_attr(attributes, word):
 
     value = modifiers.get(word, -1000)
+    tag = 'MDF'
     if value == -1000:
         value = qualifiers.get(word, -1000)
+        tag = 'QLF'
         if value == -1000:
             with open('Datasets/dictionaries/attribute_synonyms.txt', 'r') as file:
                 lines = file.readlines()
 
-            print (lines)
-
             for line in lines:
                 line = line.replace('\n', '').replace('\r', '')
                 attr_synonyms = line.split(', ')
-                print(attr_synonyms)
+
                 for i in range(len(attr_synonyms)):
                     if word == attr_synonyms[i] or porter.stem(word) == porter.stem(attr_synonyms[i]):
                         word = attr_synonyms[0]
                         value = 0
+                        tag = 'ATR'
                         break
                 if value == 0:
                     break
@@ -429,7 +429,7 @@ def add_pot_attr(attributes, word):
             if value == -1000:
                 return False
     
-    tuple = [word, value]
+    tuple = [word, value, tag]
     attributes.append(tuple)
     return True
 
@@ -447,10 +447,11 @@ def input_to_arrays(words):
         if word[1] not in unimportant:
             # Check if a country is being referenced
             country_words = 0
-            if 'NN' in word[1] or 'VB' == word[1]:
-                country_words = is_country(words, i)
-            if country_words > 0 or 'countr' in word[0] or 'nation' in word[0]:
+            country_words = is_country(words, i)
+            if country_words > 0:
                 countries.append(word[0])
+            elif 'countr' in word[0] or 'nation' in word[0] or 'plac' in word[0] or 'dest' in word[0] or 'locat' in word[0]:
+                countries.append('country')
             elif 'JJ' in word[1] or 'RB' in word[1] or 'NN' in word[1] or 'VB' in word[1]:
                 if not add_pot_attr(attributes, word[0]):
                     description.append(word)
@@ -458,6 +459,72 @@ def input_to_arrays(words):
                 description.append(word)
 
     return countries, attributes, description
+
+def print_inlist_format(list):
+    for i, object in enumerate(list):
+        print(object, end='')
+        if i + 1 == len(list):
+            print(' ', end='')
+        elif i + 2 == len(list):
+            print(' and ', end='')
+        else:
+            print(', ', end='')
+    return
+
+def attribute_comparison(countries, attributes, comparison):
+    countries_best = []
+    best = 0
+
+    for country in countries:
+        if country != 'country':
+            i = 0
+            average_attributes_rating = 0
+            for i, attribute in enumerate(attributes):
+                if attribute[2] == 'ATR':
+                    # TODO: take into account temperature
+                    average_attributes_rating += countries_df.loc[country, attribute[0]]
+                
+            average_attributes_rating = (average_attributes_rating / (i+1))
+            print(country+' '+str(average_attributes_rating))
+
+            if average_attributes_rating > best:
+                countries_best = [country]
+                best = average_attributes_rating
+            elif average_attributes_rating == best:
+                countries_best.append(country)
+
+    if len(countries_best) > 1:
+        print_inlist_format(countries_best)
+        print('are equally good', end=' ')
+
+        attribute_names = []
+        for attribute in attributes:
+            attribute_names.append(attribute[0])
+
+        if (len(countries_best) < len(countries)):
+            print('and have a better ', end='')
+            print_inlist_format(attribute_names)
+        print()
+    else :
+        print(countries_best[0]+' is '+comparison)
+
+def process_input(countries, attributes, description):
+
+    theres_attr = False
+    for word in attributes:
+        if word[2] == 'ATR':
+            theres_attr = True
+
+    comparison = ''
+    for word in description:
+        if word[1] == 'RBR' or word[1] == 'JJR':
+            comparison = word[0]
+
+    if comparison != '' and theres_attr:
+        attribute_comparison(countries, attributes, comparison)
+    elif 
+        
+    return
 
 def main():
 
@@ -474,11 +541,13 @@ def main():
     txt_to_csv_column('temperature.txt')
     txt_to_csv_column('tourism.txt')
     global countries_df
-    countries_df = pd.read_csv('Datasets/country_attributes.csv')
+    countries_df = pd.read_csv('Datasets/country_attributes.csv', index_col=0)
     countries_df = countries_df.dropna()
+    countries_df.columns = countries_df.columns.str.lower()
+    countries_df.index = countries_df.index.str.lower()
 
     global all_countries
-    all_countries = countries_df['Country'].values
+    all_countries = countries_df.index
 
     continent_words = ["europe", "asia", "africa", "america", "oceania"]
 
@@ -506,6 +575,8 @@ def main():
         print(countries)
         print(attributes)
         print(description)
+
+        process_input(countries, attributes, description)
 
 if __name__ == "__main__":
     nltk.download('punkt')
