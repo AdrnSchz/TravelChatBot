@@ -509,20 +509,21 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
             elif average_attributes_rating == best:
                 countries_best.append(country)
 
+    attribute_names = []
+    for attribute in attributes:
+        attribute_names.append(attribute[0])
+
     if len(countries_best) > 1:
         print_inlist_format(countries_best)
         print('are similarly good', end=' ')
-
-        attribute_names = []
-        for attribute in attributes:
-            attribute_names.append(attribute[0])
 
         if (len(countries_best) < len(countries)):
             print('and have a better ', end='')
             print_inlist_format(attribute_names)
         print()
     else:
-        print(countries_best[0]+' has the '+comparison+' at ', end='')
+        print(attribute_names)
+        print(countries_best[0]+' has the '+comparison+' ', end='')
         print_inlist_format(attribute_names)
 
 
