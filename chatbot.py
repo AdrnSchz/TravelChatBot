@@ -20,7 +20,7 @@ class TravelChatbotUI:
         self.widget_root = widget_root
         self.widget_root.title("TravelChatbot")
 
-        self.chat = scrolledtext.ScrolledText(widget_root, wrap=tk.WORD, width=70, height=50, state='disabled')
+        self.chat = scrolledtext.ScrolledText(widget_root, wrap=tk.WORD, width=30, height=20, state='disabled')
         self.chat.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
 
         self.input_box = tk.Entry(widget_root, width=40)
