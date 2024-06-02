@@ -347,35 +347,6 @@ def txt_to_csv_column(txt_name):
     except:
         print('unable to write in', csv_path)
 
-def get_rating(country, attribute, description):
-
-    if attribute != 'temperature':
-        return countries_df.at[country, attribute]
-
-    country_temp = countries_df.at[country, 'temperature']
-    ideal_temp = 17
-
-    hot_syn = ['hot', 'warm', 'humid', 'tropical']
-
-    for word in description:
-        for syn in hot_syn:
-            if syn in word:
-                ideal_temp = 22
-
-    cold_syn = ['cold', 'freez', 'chill', 'cool', 'snow', 'ice', 'icy', 'frost']
-
-    for word in description:
-        for syn in cold_syn:
-            if syn in word:
-                ideal_temp = 5
-
-    rating = 1 - (abs(country_temp - ideal_temp) /20)
-
-    if rating > 1:
-        rating = 1
-
-    return rating
-
 # Tokenize and remove punctuation
 def tokenize(text):
     tokens = nltk.word_tokenize(text)
@@ -534,7 +505,6 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
         attributes = []
         for attribute in countries_df.columns:
             attributes.append([attribute, 0, 'ATR'])
-        attributes = [attr for attr in attributes if attr[0] != 'temperature']
 
     no_actual_country = True
     for country in countries:
@@ -709,8 +679,7 @@ def check_country(country):
             line = line.replace('\n', '').replace('\r', '')
             attr_synonyms = line.split(', ')
 
-            if attr_synonyms[0] != "temperature":
-                attributes.append([attr_synonyms[0], 0, 'ATR'])
+            attributes.append([attr_synonyms[0], 0, 'ATR'])         
 
     print(country, "has the following average ratings:\n")
 
@@ -746,7 +715,7 @@ def print_overall(country, average):
 def get_countries_attr(attributes):
 
     attr = [attribute[0] for attribute in attributes if attribute[0] in countries_df.iloc[0]]
-
+    
     df_attr = countries_df[attr].copy(True)
     df_attr['score'] = df_attr.sum(axis=1)
     top_countries = df_attr.nlargest(3, 'score').index.tolist()
@@ -766,7 +735,8 @@ def get_similar_country(country, attributes):
 
     # Normalize temperature
     if 'temperature' in attr:
-        df_attr['temperature'] = (df_attr['temperature'] - df_attr['temperature'].min()) / (df_attr['temperature'].max() - df_attr['temperature'].min())
+        df_attr['temperature'] = (df_attr['temperature_raw'] - df_attr['temperature_raw'].min()) / (df_attr['temperature_raw'].max() - df_attr['temperature_raw'].min())
+        df_attr = df_attr.drop(columns='temperature_raw')
 
     kmeans = KMeans(5, init='k-means++', n_init=100)
     labels = kmeans.fit_predict(df_attr)
@@ -793,7 +763,7 @@ def check_for_similar(description):
 def process_input(countries, attributes, description):
 
     thereis_attr = False
-    attributes = [attr for attr in attributes if attr[0] != 'temperature']
+
     for word in attributes:
         if word[2] == 'ATR':
             thereis_attr = True
@@ -802,9 +772,6 @@ def process_input(countries, attributes, description):
     for word in description:
         if word[1] == 'RBR' or word[1] == 'JJR' or word[1] == 'RBS' or word[1] == 'JJS' or word[0] == 'nicer' or word[0] == 'compare':
             comparison = word[0]
-
-    print("a")
-    print(description)
 
     if comparison != '' and (len(countries) == 0 or len(countries) > 2 or (len(countries) == 2 and 'country' not in countries)):
         attribute_comparison(countries, attributes, comparison, thereis_attr)  
@@ -845,6 +812,11 @@ def main():
     countries_df = countries_df.dropna()
     countries_df.columns = countries_df.columns.str.lower()
     countries_df.index = countries_df.index.str.lower()
+
+    countries_df['temperature_raw'] = countries_df['temperature']
+
+    # Normalize temperature with 20ºC as ideal temperature, apply extra penalization for each degree >= 25ºC or <= 10ºC
+    countries_df['temperature'] = countries_df['temperature'].apply(lambda x: min(1, 1 - ((abs(x - 20) + max(0, x - 24) + max(0, 11 - x)) / 20)))
 
     global all_countries
     all_countries = list(countries_df.index)
