@@ -493,7 +493,11 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
     
     if no_actual_country:
         countries = list(countries_df.index)
-
+    else: 
+        if 'country' in countries:
+            countries.remove('country')
+        
+    print(countries)
     countries_best = []
     best = 0
     attribute_winners = {attribute[0]: [] for attribute in attributes if attribute[2] == 'ATR'}
@@ -531,7 +535,7 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
         if len(winners) == 1 and winners[0] == lastWinner:
             again = True
-        elif len(winners) == 1 or (lastWinner != '' and lastWinner not in winners):
+        elif lastWinner != '' and (len(winners) == 1 or lastWinner not in winners):
             different = True
 
         if different:
@@ -541,23 +545,23 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
         print_inlist_format(winners)
         if again:
-            print(' is also the best ', end='')
+            print('is also the best. ', end='')
         elif (len(winners) > 1):
             lastWinner = ''
-            print(' are the best ', end='')
+            print('are the best. ', end='')
         else:
             lastWinner = winners[0]
-            print('is the best ', end='')
+            print('is the best. ', end='')
 
 
     if len(countries_best) == len(countries):
-        print('Overall, all the countries you mentioned are similarly good. The best one will depend on your preferences.')
+        print('\nOverall, all the countries you mentioned are similarly good. The best one will depend on your preferences.')
     elif len(countries_best) > 1:
-        print('Overall, ', end='')
+        print('\nOverall, ', end='')
         print_inlist_format(countries_best)
         print('are similarly good. The best one will depend on your preferences.')
     else:
-        print('Overall, ', end='')
+        print('\nOverall, ', end='')
         print(countries_best[0], end=' ')
         if len(countries) > 2:
             print('is the best. Though depending on how you value each factor, you might find another country as the best.')
