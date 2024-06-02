@@ -509,6 +509,7 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
         attributes = []
         for attribute in countries_df.columns:
             attributes.append([attribute, 0, 'ATR'])
+        attributes = [attr for attr in attributes if attr[0] != 'temperature']
 
     no_actual_country = True
     for country in countries:
@@ -517,6 +518,9 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
     
     if no_actual_country:
         countries = list(countries_df.index)
+    else: 
+        if 'country' in countries:
+            countries.remove('country')
 
     countries_best = []
     best = 0
@@ -529,15 +533,11 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
             for i, attribute in enumerate(attributes):
                 if attribute[2] == 'ATR':
-                    if attribute[0] != 'temperature':
-                        average_attributes_rating += countries_df.loc[country, attribute[0]]
-                        if not attribute_winners[attribute[0]] or countries_df.loc[country, attribute[0]] > countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
-                            attribute_winners[attribute[0]] = [country]
-                        elif countries_df.loc[country, attribute[0]] == countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
-                            attribute_winners[attribute[0]].append(country)
-                    else:
-                        # TODO: handle temperature
-                        i -= 1
+                    average_attributes_rating += countries_df.loc[country, attribute[0]]
+                    if not attribute_winners[attribute[0]] or countries_df.loc[country, attribute[0]] > countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
+                        attribute_winners[attribute[0]] = [country]
+                    elif countries_df.loc[country, attribute[0]] == countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
+                        attribute_winners[attribute[0]].append(country)
                 
             average_attributes_rating = (average_attributes_rating / (i+1))
 
@@ -555,7 +555,7 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
         if len(winners) == 1 and winners[0] == lastWinner:
             again = True
-        elif len(winners) == 1 or (lastWinner != '' and lastWinner not in winners):
+        elif lastWinner != '' and (len(winners) == 1 or lastWinner not in winners):
             different = True
 
         if different:
@@ -565,23 +565,23 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
         print_inlist_format(winners)
         if again:
-            print(' is also the best ', end='')
+            print('is also the best. ', end='')
         elif (len(winners) > 1):
             lastWinner = ''
-            print(' are the best ', end='')
+            print('are the best. ', end='')
         else:
             lastWinner = winners[0]
-            print('is the best ', end='')
+            print('is the best. ', end='')
 
 
     if len(countries_best) == len(countries):
-        print('Overall, all the countries you mentioned are similarly good. The best one will depend on your preferences.')
+        print('\nOverall, all the countries you mentioned are similarly good. The best one will depend on your preferences.')
     elif len(countries_best) > 1:
-        print('Overall, ', end='')
+        print('\nOverall, ', end='')
         print_inlist_format(countries_best)
         print('are similarly good. The best one will depend on your preferences.')
     else:
-        print('Overall, ', end='')
+        print('\nOverall, ', end='')
         print(countries_best[0], end=' ')
         if len(countries) > 2:
             print('is the best. Though depending on how you value each factor, you might find another country as the best.')
@@ -684,6 +684,7 @@ def check_country(country, attributes):
 def process_input(countries, attributes, description):
 
     thereis_attr = False
+    attributes = [attr for attr in attributes if attr[0] != 'temperature']
     for word in attributes:
         if word[2] == 'ATR':
             thereis_attr = True
@@ -694,9 +695,9 @@ def process_input(countries, attributes, description):
             comparison = word[0]
         
 
-    if comparison != '' and len(countries) > 0:
+    if comparison != '' and (len(countries) == 0 or len(countries) > 2 or (len(countries) == 2 and 'country' not in countries)):
         attribute_comparison(countries, attributes, comparison, thereis_attr)        
-    elif len(countries) > 0:
+    elif len(countries) > 0 and len(attributes) > 0:
         for country in countries:
             check_country(country, attributes)
     else:
