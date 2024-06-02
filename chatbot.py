@@ -8,6 +8,61 @@ from nltk.corpus import stopwords
 from collections import deque
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 from sklearn.cluster import KMeans
+import tkinter as tk
+from tkinter import scrolledtext
+import io
+import sys
+
+class TravelChatbotUI:
+
+    def __init__(self, widget_root):
+
+        self.widget_root = widget_root
+        self.widget_root.title("TravelChatbot")
+
+        self.chat = scrolledtext.ScrolledText(widget_root, wrap=tk.WORD, width=70, height=50, state='disabled')
+        self.chat.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+        self.input_box = tk.Entry(widget_root, width=40)
+        self.input_box.grid(row=1, column=0, padx=10, pady=10)
+        self.input_box.bind("<Return>", self.send_input)
+
+        self.button = tk.Button(widget_root, text="Send", command=self.send_input)
+        self.button.grid(row=1, column=1, padx=10, pady=10)
+
+    def send_input(self, event=None):
+
+        input = self.input_box.get()
+        if input.strip():
+            self.chat.configure(state='normal')
+            self.chat.insert(tk.END, f"You: {input}\n")
+            self.chat.insert(tk.END, f"Bot: {self.fetch_response(input)}\n")
+            self.chat.configure(state='disabled')
+            self.chat.yview(tk.END)
+            self.input_box.delete(0, tk.END)
+
+    def fetch_response(self, input):
+
+        output_capture = io.StringIO()
+        sys.stdout = output_capture
+
+        words = process_text_tags(input.lower())
+
+        countries = []
+        attributes = []
+        description = []
+
+        countries, attributes, description = input_to_arrays(words)
+
+        process_input(countries, attributes, description)
+
+        captured_output = output_capture.getvalue()
+
+        output_capture.close()
+
+        sys.stdout = sys.__stdout__
+
+        return captured_output
 
 '''
 class BasicInfo:
@@ -427,7 +482,6 @@ def is_country(words, i):
         if len(pot_countries) == 0:
             return '', 0
         elif len(pot_countries) == 1:
-            print(pot_countries)
             return pot_countries[0], len(pot_countries[0])
 
 def add_pot_attr(attributes, word):
@@ -793,7 +847,7 @@ def process_input(countries, attributes, description):
     else:
         print('I can\'t understand. Please reformulate or elaborate more your words.')
 
-def main():
+def initialize():
 
     txt_to_csv_column('coast.txt')
     txt_to_csv_column('culture.txt')
@@ -831,31 +885,14 @@ def main():
     global messages
     messages = load_messages('Datasets/messages.txt')
 
-    while True:    
-        # Read and process input (tokenization, filtering and lemmatization)
-        data = input("\n> ")
-        # Process the text
-        words = process_text_tags(data.lower())
-
-        print(words)
-        print()
-
-        #continents = []
-        countries = []
-        attributes = []
-        description = []
-
-        countries, attributes, description = input_to_arrays(words)
-        print()
-        print(countries)
-        print(attributes)
-        print(description)
-
-        process_input(countries, attributes, description)
-
 if __name__ == "__main__":
     nltk.download('punkt')
     nltk.download('stopwords')
     nltk.download('wordnet')
     nltk.download("averaged_perceptron_tagger")
-    main()
+
+    initialize()
+
+    widget = tk.Tk()
+    app = TravelChatbotUI(widget)
+    widget.mainloop()
