@@ -8,6 +8,61 @@ from nltk.corpus import stopwords
 from collections import deque
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
 from sklearn.cluster import KMeans
+import tkinter as tk
+from tkinter import scrolledtext
+import io
+import sys
+
+class TravelChatbotUI:
+
+    def __init__(self, widget_root):
+
+        self.widget_root = widget_root
+        self.widget_root.title("TravelChatbot")
+
+        self.chat = scrolledtext.ScrolledText(widget_root, wrap=tk.WORD, width=70, height=50, state='disabled')
+        self.chat.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+        self.input_box = tk.Entry(widget_root, width=40)
+        self.input_box.grid(row=1, column=0, padx=10, pady=10)
+        self.input_box.bind("<Return>", self.send_input)
+
+        self.button = tk.Button(widget_root, text="Send", command=self.send_input)
+        self.button.grid(row=1, column=1, padx=10, pady=10)
+
+    def send_input(self, event=None):
+
+        input = self.input_box.get()
+        if input.strip():
+            self.chat.configure(state='normal')
+            self.chat.insert(tk.END, f"You: {input}\n")
+            self.chat.insert(tk.END, f"Bot: {self.fetch_response(input)}\n")
+            self.chat.configure(state='disabled')
+            self.chat.yview(tk.END)
+            self.input_box.delete(0, tk.END)
+
+    def fetch_response(self, input):
+
+        output_capture = io.StringIO()
+        sys.stdout = output_capture
+
+        words = process_text_tags(input.lower())
+
+        countries = []
+        attributes = []
+        description = []
+
+        countries, attributes, description = input_to_arrays(words)
+
+        process_input(countries, attributes, description)
+
+        captured_output = output_capture.getvalue()
+
+        output_capture.close()
+
+        sys.stdout = sys.__stdout__
+
+        return captured_output
 
 '''
 class BasicInfo:
@@ -347,35 +402,6 @@ def txt_to_csv_column(txt_name):
     except:
         print('unable to write in', csv_path)
 
-def get_rating(country, attribute, description):
-
-    if attribute != 'temperature':
-        return countries_df.at[country, attribute]
-
-    country_temp = countries_df.at[country, 'temperature']
-    ideal_temp = 17
-
-    hot_syn = ['hot', 'warm', 'humid', 'tropical']
-
-    for word in description:
-        for syn in hot_syn:
-            if syn in word:
-                ideal_temp = 22
-
-    cold_syn = ['cold', 'freez', 'chill', 'cool', 'snow', 'ice', 'icy', 'frost']
-
-    for word in description:
-        for syn in cold_syn:
-            if syn in word:
-                ideal_temp = 5
-
-    rating = 1 - (abs(country_temp - ideal_temp) /20)
-
-    if rating > 1:
-        rating = 1
-
-    return rating
-
 # Tokenize and remove punctuation
 def tokenize(text):
     tokens = nltk.word_tokenize(text)
@@ -533,7 +559,6 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
         attributes = []
         for attribute in countries_df.columns:
             attributes.append([attribute, 0, 'ATR'])
-        attributes = [attr for attr in attributes if attr[0] != 'temperature']
 
     no_actual_country = True
     for country in countries:
@@ -708,8 +733,7 @@ def check_country(country):
             line = line.replace('\n', '').replace('\r', '')
             attr_synonyms = line.split(', ')
 
-            if attr_synonyms[0] != "temperature":
-                attributes.append([attr_synonyms[0], 0, 'ATR'])
+            attributes.append([attr_synonyms[0], 0, 'ATR'])         
 
     print(country, "has the following average ratings:\n")
 
@@ -745,7 +769,7 @@ def print_overall(country, average):
 def get_countries_attr(attributes):
 
     attr = [attribute[0] for attribute in attributes if attribute[0] in countries_df.iloc[0]]
-
+    
     df_attr = countries_df[attr].copy(True)
     df_attr['score'] = df_attr.sum(axis=1)
     top_countries = df_attr.nlargest(3, 'score').index.tolist()
@@ -765,7 +789,8 @@ def get_similar_country(country, attributes):
 
     # Normalize temperature
     if 'temperature' in attr:
-        df_attr['temperature'] = (df_attr['temperature'] - df_attr['temperature'].min()) / (df_attr['temperature'].max() - df_attr['temperature'].min())
+        df_attr['temperature'] = (df_attr['temperature_raw'] - df_attr['temperature_raw'].min()) / (df_attr['temperature_raw'].max() - df_attr['temperature_raw'].min())
+        df_attr = df_attr.drop(columns='temperature_raw')
 
     kmeans = KMeans(5, init='k-means++', n_init=100)
     labels = kmeans.fit_predict(df_attr)
@@ -792,7 +817,7 @@ def check_for_similar(description):
 def process_input(countries, attributes, description):
 
     thereis_attr = False
-    attributes = [attr for attr in attributes if attr[0] != 'temperature']
+
     for word in attributes:
         if word[2] == 'ATR':
             thereis_attr = True
@@ -822,7 +847,7 @@ def process_input(countries, attributes, description):
     else:
         print('I can\'t understand. Please reformulate or elaborate more your words.')
 
-def main():
+def initialize():
 
     txt_to_csv_column('coast.txt')
     txt_to_csv_column('culture.txt')
@@ -842,6 +867,11 @@ def main():
     countries_df.columns = countries_df.columns.str.lower()
     countries_df.index = countries_df.index.str.lower()
 
+    countries_df['temperature_raw'] = countries_df['temperature']
+
+    # Normalize temperature with 20ºC as ideal temperature, apply extra penalization for each degree >= 25ºC or <= 10ºC
+    countries_df['temperature'] = countries_df['temperature'].apply(lambda x: min(1, 1 - ((abs(x - 20) + max(0, x - 24) + max(0, 11 - x)) / 20)))
+
     global all_countries
     all_countries = list(countries_df.index)
 
@@ -855,24 +885,14 @@ def main():
     global messages
     messages = load_messages('Datasets/messages.txt')
 
-    while True:    
-        # Read and process input (tokenization, filtering and lemmatization)
-        data = input("\n> ")
-        # Process the text
-        words = process_text_tags(data.lower())
-
-        #continents = []
-        countries = []
-        attributes = []
-        description = []
-
-        countries, attributes, description = input_to_arrays(words)
-        
-        process_input(countries, attributes, description)
-
 if __name__ == "__main__":
     nltk.download('punkt')
     nltk.download('stopwords')
     nltk.download('wordnet')
     nltk.download("averaged_perceptron_tagger")
-    main()
+
+    initialize()
+
+    widget = tk.Tk()
+    app = TravelChatbotUI(widget)
+    widget.mainloop()
