@@ -442,7 +442,6 @@ def add_pot_attr(attributes, word):
     attributes.append(tuple)
     return True
 
-
 def input_to_arrays(words):
 
     #continents = []
@@ -578,7 +577,8 @@ def get_attribute_message(attributes, rating):
             print(', ' + msg, end='')
         i += 1
 
-def check_country(country, attributes):
+def check_country_attr(country, attributes):
+    
     country_info = countries_df.loc[country]
     evaluations = {
         'perfect': [],
@@ -589,6 +589,8 @@ def check_country(country, attributes):
         'poor': [],
         'very poor': []
     }
+
+    country = country.capitalize()
 
     average = 0.0
     for attribute in attributes:
@@ -618,7 +620,7 @@ def check_country(country, attributes):
 
         if attrs:
             if first:
-                print(f"When talking about {country.capitalize()}, regarding the ", end='')
+                print(f"When talking about {country}, regarding the ", end='')
                 first = False
             else:
                 print(" In terms of ", end='')
@@ -641,20 +643,54 @@ def check_country(country, attributes):
                 print(', it couldn\'t be worse. ', end='')
             get_attribute_message(attrs, rating)
 
+    print_overall(country, average)
+
+def check_country(country):
+    
+    country_info = countries_df.loc[country]
+    attributes = []
+
+    country = country.capitalize()
+
+    with open('Datasets/dictionaries/attribute_synonyms.txt', 'r') as file:
+        lines = file.readlines()
+
+        for line in lines:
+            line = line.replace('\n', '').replace('\r', '')
+            attr_synonyms = line.split(', ')
+
+            if attr_synonyms[0] != "temperature":
+                attributes.append([attr_synonyms[0], 0, 'ATR'])
+
+    print(country, "has the following average ratings:\n")
+
+    average = 0.0
+    for attribute in attributes:
+        attr_name = attribute[0]
+        if attr_name in country_info:
+            attr_value = country_info[attr_name]
+            average += attr_value
+            print("{0}: {1}/10".format(attr_name, int(attr_value * 10)))
+
+    average = average / len(attributes)
+
+    print_overall(country, average)
+
+def print_overall(country, average):
     if (average >= 1):
-        print('\nThere is no better place for what you are looking for. You better visit ' + country.capitalize(), end='')
+        print('\nThere is no better place for what you are looking for. You better visit ' + country, end='')
         print('. I bet it will be the best trip of your life!\n')
     elif (average >= 0.85):
-        print('\nOverall, I would highly recommend you to visit '+ country.capitalize(), end='')
+        print('\nOverall, I would highly recommend you to visit '+ country, end='')
         print('. You will have an amazing time there!\n')
     elif (average >= 0.5):
-        print('\nOverall, ' + country.capitalize(), end='')
+        print('\nOverall, ' + country, end='')
         print(' is a good place for you to visit. You will have a great time there!\n')
     elif (average >= 0.25):
-        print('\nOverall, I would not recommend you to visit ' + country.capitalize(), end='')
+        print('\nOverall, I would not recommend you to visit ' + country, end='')
         print('. As it will be lacking in some aspects you are looking for. I am sure there is a better place for you to visit!\n')
     else:
-        print('\nI doubt there is a worst place than ' + country.capitalize(), end='')
+        print('\nI doubt there is a worst place than ' + country, end='')
         print(' for you to visit, anywhere will be better than that place. I would recommend you to avoid it at all costs!\n')
 
 def process_input(countries, attributes, description):
@@ -668,13 +704,15 @@ def process_input(countries, attributes, description):
     for word in description:
         if word[1] == 'RBR' or word[1] == 'JJR' or word[1] == 'RBS' or word[1] == 'JJS' or word[0] == 'nicer' or word[0] == 'compare':
             comparison = word[0]
-        
 
     if comparison != '' and len(countries) > 0:
         attribute_comparison(countries, attributes, comparison, thereis_attr)        
+    elif len(countries) > 0 and len(attributes) > 0:
+        for country in countries:
+            check_country_attr(country, attributes)
     elif len(countries) > 0:
         for country in countries:
-            check_country(country, attributes)
+            check_country(country)
     else:
         print('I can\'t understand. Please reformulate or elaborate more your words.')
     return
