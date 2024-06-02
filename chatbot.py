@@ -717,6 +717,16 @@ def print_overall(country, average):
         print('\nI doubt there is a worst place than ' + country, end='')
         print(' for you to visit, anywhere will be better than that place. I would recommend you to avoid it at all costs!\n')
 
+def get_countries_attr(attributes):
+
+    attr = [attribute[0] for attribute in attributes if attribute[0] in countries_df.iloc[0]]
+
+    df_attr = countries_df[attr].copy(True)
+    df_attr['score'] = df_attr.sum(axis=1)
+    top_countries = df_attr.nlargest(3, 'score').index.tolist()
+    
+    print("The countries with the best {} are {}.".format(', '.join(attr), ', '.join(top_countries[:3])))
+
 def process_input(countries, attributes, description):
 
     thereis_attr = False
@@ -730,14 +740,21 @@ def process_input(countries, attributes, description):
         if word[1] == 'RBR' or word[1] == 'JJR' or word[1] == 'RBS' or word[1] == 'JJS' or word[0] == 'nicer' or word[0] == 'compare':
             comparison = word[0]
 
+    print("a")
+    print(description)
+
     if comparison != '' and (len(countries) == 0 or len(countries) > 2 or (len(countries) == 2 and 'country' not in countries)):
-        attribute_comparison(countries, attributes, comparison, thereis_attr)        
+        attribute_comparison(countries, attributes, comparison, thereis_attr) 
+    elif "country" in countries and len(attributes) > 0:
+        get_countries_attr(attributes)       
     elif len(countries) > 0 and len(attributes) > 0:
         for country in countries:
-            check_country_attr(country, attributes)
-    elif len(countries) > 0:
+            if country != "country":
+                check_country_attr(country, attributes)
+    elif len(countries) > 0 and any(item != "country" for item in countries):
         for country in countries:
-            check_country(country)
+            if country != "country":
+                check_country(country)
     else:
         print('I can\'t understand. Please reformulate or elaborate more your words.')
     return
