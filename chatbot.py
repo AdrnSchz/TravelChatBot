@@ -537,7 +537,7 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
         if different:
             print(f"Nevertheless, in terms of " + attribute + ", ", end='')
         else:
-            print("In terms of" + attribute + ", ", end='')
+            print("In terms of " + attribute + ", ", end='')
 
         print_inlist_format(winners)
         if again:
@@ -557,10 +557,105 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
         print_inlist_format(countries_best)
         print('are similarly good. The best one will depend on your preferences.')
     else:
-        print(attribute_names)
-        print(countries_best[0]+' has the '+comparison+' ', end='')
-        print_inlist_format(attribute_names)
+        print('Overall, ', end='')
+        print(countries_best[0], end=' ')
+        if len(countries) > 2:
+            print('is the best. Though depending on how you value each factor, you might find another country as the best.')
+        else:
+            print('is the best. Though depending on how you value each factor, you might find the other as the best.')
 
+def get_attribute_message(attributes, rating):
+    i = 0
+    for attribute in attributes:
+        key = f"{attribute}_{rating.replace(' ', '_')}"
+        msg = messages.get(key, f"No message for {attribute} with rating {rating}")
+        if i == 0:
+            msg = msg.capitalize()
+            print(msg, end='')
+        elif i + 1 == len(attributes):
+            print(' and ' + msg + '.', end='')
+        else:
+            print(', ' + msg, end='')
+        i += 1
+
+def check_country(country, attributes):
+    country_info = countries_df.loc[country]
+    evaluations = {
+        'perfect': [],
+        'excellent': [],
+        'very good': [],
+        'good': [],
+        'okay': [],
+        'poor': [],
+        'very poor': []
+    }
+
+    average = 0.0
+    for attribute in attributes:
+        attr_name = attribute[0]
+        if attr_name in country_info:
+            attr_value = country_info[attr_name]
+            average += attr_value
+            if attr_value >= 1:
+                evaluations['perfect'].append(attr_name)
+            if attr_value >= 0.85:
+                evaluations['excellent'].append(attr_name)
+            elif attr_value >= 0.7:
+                evaluations['very good'].append(attr_name)
+            elif attr_value >= 0.55:
+                evaluations['good'].append(attr_name)
+            elif attr_value >= 0.4:
+                evaluations['okay'].append(attr_name)
+            elif attr_value >= 0.25:
+                evaluations['poor'].append(attr_name)
+            else:
+                evaluations['very poor'].append(attr_name)
+
+    average = average / len(attributes)
+    
+    first = True
+    for rating, attrs in evaluations.items():
+
+        if attrs:
+            if first:
+                print(f"When talking about {country.capitalize()}, regarding the ", end='')
+                first = False
+            else:
+                print(" In terms of ", end='')
+            
+            print_inlist_format(attrs)
+
+            if rating == 'perfect':
+                print(', it could not be better. ', end='')
+            elif rating == 'excellent':
+                print(', it\'s excellent. ', end='')
+            elif rating == 'very good':
+                print(', it\'s very good. ', end='')
+            elif rating == 'good':
+                print(', it\'s good. ', end='')
+            elif rating == 'okay':
+                print(', it\'s okay. ', end='')
+            elif rating == 'poor':
+                print(', it\'s bad. ', end='')
+            elif rating == 'very poor':
+                print(', it couldn\'t be worse. ', end='')
+            get_attribute_message(attrs, rating)
+
+    if (average >= 1):
+        print('\nThere is no better place for what you are looking for. You better visit ' + country.capitalize(), end='')
+        print('. I bet it will be the best trip of your life!\n')
+    elif (average >= 0.85):
+        print('\nOverall, I would highly recommend you to visit '+ country.capitalize(), end='')
+        print('. You will have an amazing time there!\n')
+    elif (average >= 0.5):
+        print('\nOverall, ' + country.capitalize(), end='')
+        print(' is a good place for you to visit. You will have a great time there!\n')
+    elif (average >= 0.25):
+        print('\nOverall, I would not recommend you to visit ' + country.capitalize(), end='')
+        print('. As it will be lacking in some aspects you are looking for. I am sure there is a better place for you to visit!\n')
+    else:
+        print('\nI doubt there is a worst place than ' + country.capitalize(), end='')
+        print(' for you to visit, anywhere will be better than that place. I would recommend you to avoid it at all costs!\n')
 
 def process_input(countries, attributes, description):
 
