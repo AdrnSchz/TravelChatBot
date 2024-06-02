@@ -456,7 +456,6 @@ def is_country(words, i):
         if len(pot_countries) == 0:
             return '', 0
         elif len(pot_countries) == 1:
-            print(pot_countries)
             return pot_countries[0], len(pot_countries[0])
 
 def add_pot_attr(attributes, word):
@@ -803,9 +802,6 @@ def process_input(countries, attributes, description):
         if word[1] == 'RBR' or word[1] == 'JJR' or word[1] == 'RBS' or word[1] == 'JJS' or word[0] == 'nicer' or word[0] == 'compare':
             comparison = word[0]
 
-    print("a")
-    print(description)
-
     if comparison != '' and (len(countries) == 0 or len(countries) > 2 or (len(countries) == 2 and 'country' not in countries)):
         attribute_comparison(countries, attributes, comparison, thereis_attr)  
     elif any(item != "country" for item in countries) and check_for_similar(description):
@@ -865,20 +861,13 @@ def main():
         # Process the text
         words = process_text_tags(data.lower())
 
-        print(words)
-        print()
-
         #continents = []
         countries = []
         attributes = []
         description = []
 
         countries, attributes, description = input_to_arrays(words)
-        print()
-        print(countries)
-        print(attributes)
-        print(description)
-
+        
         process_input(countries, attributes, description)
 
 if __name__ == "__main__":
