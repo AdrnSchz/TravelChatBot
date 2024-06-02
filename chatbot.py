@@ -402,14 +402,36 @@ def load_messages(file_path):
     return msgs
 
 def is_country(words, i):
-    # TODO: Check for country names with more than one word (take into account words that have been removed)
-    # TODO: Check for variations of a country name
-    for j in range(len(all_countries)):
+    print('in is country')
+
+    pot_countries = all_countries.copy()
+    while (True):
+        new_pot_countries = []
         
-        #if words[i][0] in countries_df.iat[j, 0]:
-        if (all_countries[j]).lower() == words[i][0]:
-            return 1
-    return 0
+        for j in range(len(pot_countries)):
+            pot_country = (pot_countries[j]).split(' ')
+            
+            for k in range(i, len(words)):
+                if k-i == len(pot_country):
+                    break
+                if words[k][0] == pot_country[k-i] and pot_countries[j] not in new_pot_countries:
+                    #print(words[k][0], pot_country[k-i], 'eq', words[i][0], pot_countries[j], '  ', new_pot_countries, k, i, len(words), len(pot_country))
+                    new_pot_countries.append(pot_countries[j])
+                else:
+                    if words[k][0] != pot_country[k-i]:
+                        try:
+                            new_pot_countries.remove(pot_countries[j])
+                        except Exception:
+                            pass
+                        break
+
+        pot_countries = new_pot_countries.copy()
+
+        if len(pot_countries) == 0:
+            return '', 0
+        elif len(pot_countries) == 1:
+            print(pot_countries)
+            return pot_countries[0], len(pot_countries[0])
 
 def add_pot_attr(attributes, word):
 
@@ -444,27 +466,29 @@ def add_pot_attr(attributes, word):
 
 def input_to_arrays(words):
 
-    #continents = []
     countries = []
     attributes = []
     description = []
 
+    prev_country = ''
+    unimportant = ['CC', 'DT', 'EX', 'FW', 'IN', 'MD', 'VBZ', 'WDT', 'WP', 'WP$', 'WRP']
+
     for i, word in enumerate(words):
-        # Choosing certain types of words to be filtered out to process less words
-        unimportant = ['CC', 'DT', 'EX', 'FW', 'IN', 'MD', 'VBZ', 'WDT', 'WP', 'WP$', 'WRP']
-        if word[1] not in unimportant:
-            # Check if a country is being referenced
-            country_words = 0
-            country_words = is_country(words, i)
-            if country_words > 0:
-                countries.append(word[0])
-            elif 'countr' in word[0] or 'nation' in word[0] or 'plac' in word[0] or 'dest' in word[0] or 'locat' in word[0]:
-                countries.append('country')
-            elif 'JJ' in word[1] or 'RB' in word[1] or 'NN' in word[1] or 'VB' in word[1]:
-                if not add_pot_attr(attributes, word[0]):
+
+        if word[0] not in prev_country:
+            # Choosing certain types of words to be filtered out to process less words
+            if word[1] not in unimportant:
+                # Check if a country is being referenced
+                prev_country, country_words = is_country(words, i)
+                if country_words > 0:
+                    countries.append(prev_country)
+                elif 'countr' in word[0] or 'nation' in word[0] or 'plac' in word[0] or 'dest' in word[0] or 'locat' in word[0]:
+                    countries.append('country')
+                elif 'JJ' in word[1] or 'RB' in word[1] or 'NN' in word[1] or 'VB' in word[1]:
+                    if not add_pot_attr(attributes, word[0]):
+                        description.append(word)
+                else:
                     description.append(word)
-            else:
-                description.append(word)
 
     return countries, attributes, description
 
@@ -484,6 +508,7 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
         attributes = []
         for attribute in countries_df.columns:
             attributes.append([attribute, 0, 'ATR'])
+        attributes = [attr for attr in attributes if attr[0] != 'temperature']
 
     no_actual_country = True
     for country in countries:
@@ -492,6 +517,9 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
     
     if no_actual_country:
         countries = list(countries_df.index)
+    else: 
+        if 'country' in countries:
+            countries.remove('country')
 
     countries_best = []
     best = 0
@@ -504,15 +532,11 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
             for i, attribute in enumerate(attributes):
                 if attribute[2] == 'ATR':
-                    if attribute[0] != 'temperature':
-                        average_attributes_rating += countries_df.loc[country, attribute[0]]
-                        if not attribute_winners[attribute[0]] or countries_df.loc[country, attribute[0]] > countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
-                            attribute_winners[attribute[0]] = [country]
-                        elif countries_df.loc[country, attribute[0]] == countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
-                            attribute_winners[attribute[0]].append(country)
-                    else:
-                        # TODO: handle temperature
-                        i -= 1
+                    average_attributes_rating += countries_df.loc[country, attribute[0]]
+                    if not attribute_winners[attribute[0]] or countries_df.loc[country, attribute[0]] > countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
+                        attribute_winners[attribute[0]] = [country]
+                    elif countries_df.loc[country, attribute[0]] == countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
+                        attribute_winners[attribute[0]].append(country)
                 
             average_attributes_rating = (average_attributes_rating / (i+1))
 
@@ -530,7 +554,7 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
         if len(winners) == 1 and winners[0] == lastWinner:
             again = True
-        elif len(winners) == 1 or (lastWinner != '' and lastWinner not in winners):
+        elif lastWinner != '' and (len(winners) == 1 or lastWinner not in winners):
             different = True
 
         if different:
@@ -540,23 +564,23 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
         print_inlist_format(winners)
         if again:
-            print(' is also the best ', end='')
+            print('is also the best. ', end='')
         elif (len(winners) > 1):
             lastWinner = ''
-            print(' are the best ', end='')
+            print('are the best. ', end='')
         else:
             lastWinner = winners[0]
-            print('is the best ', end='')
+            print('is the best. ', end='')
 
 
     if len(countries_best) == len(countries):
-        print('Overall, all the countries you mentioned are similarly good. The best one will depend on your preferences.')
+        print('\nOverall, all the countries you mentioned are similarly good. The best one will depend on your preferences.')
     elif len(countries_best) > 1:
-        print('Overall, ', end='')
+        print('\nOverall, ', end='')
         print_inlist_format(countries_best)
         print('are similarly good. The best one will depend on your preferences.')
     else:
-        print('Overall, ', end='')
+        print('\nOverall, ', end='')
         print(countries_best[0], end=' ')
         if len(countries) > 2:
             print('is the best. Though depending on how you value each factor, you might find another country as the best.')
@@ -696,6 +720,7 @@ def print_overall(country, average):
 def process_input(countries, attributes, description):
 
     thereis_attr = False
+    attributes = [attr for attr in attributes if attr[0] != 'temperature']
     for word in attributes:
         if word[2] == 'ATR':
             thereis_attr = True
@@ -705,7 +730,7 @@ def process_input(countries, attributes, description):
         if word[1] == 'RBR' or word[1] == 'JJR' or word[1] == 'RBS' or word[1] == 'JJS' or word[0] == 'nicer' or word[0] == 'compare':
             comparison = word[0]
 
-    if comparison != '' and len(countries) > 0:
+    if comparison != '' and (len(countries) == 0 or len(countries) > 2 or (len(countries) == 2 and 'country' not in countries)):
         attribute_comparison(countries, attributes, comparison, thereis_attr)        
     elif len(countries) > 0 and len(attributes) > 0:
         for country in countries:
@@ -738,7 +763,7 @@ def main():
     countries_df.index = countries_df.index.str.lower()
 
     global all_countries
-    all_countries = countries_df.index
+    all_countries = list(countries_df.index)
 
     continent_words = ["europe", "asia", "africa", "america", "oceania"]
 
@@ -749,6 +774,7 @@ def main():
 
     global messages
     messages = load_messages('Datasets/messages.txt')
+
     while True:    
         # Read and process input (tokenization, filtering and lemmatization)
         data = input("\n> ")
