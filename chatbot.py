@@ -402,14 +402,36 @@ def load_messages(file_path):
     return msgs
 
 def is_country(words, i):
-    # TODO: Check for country names with more than one word (take into account words that have been removed)
-    # TODO: Check for variations of a country name
-    for j in range(len(all_countries)):
+    print('in is country')
+
+    pot_countries = all_countries.copy()
+    while (True):
+        new_pot_countries = []
         
-        #if words[i][0] in countries_df.iat[j, 0]:
-        if (all_countries[j]).lower() == words[i][0]:
-            return 1
-    return 0
+        for j in range(len(pot_countries)):
+            pot_country = (pot_countries[j]).split(' ')
+            
+            for k in range(i, len(words)):
+                if k-i == len(pot_country):
+                    break
+                if words[k][0] == pot_country[k-i] and pot_countries[j] not in new_pot_countries:
+                    print(words[k][0], pot_country[k-i], 'eq', words[i][0], pot_countries[j], '  ', new_pot_countries, k, i, len(words), len(pot_country))
+                    new_pot_countries.append(pot_countries[j])
+                else:
+                    if words[k][0] != pot_country[k-i]:
+                        try:
+                            new_pot_countries.remove(pot_countries[j])
+                        except Exception:
+                            pass
+                        break
+
+        pot_countries = new_pot_countries.copy()
+
+        if len(pot_countries) == 0:
+            return '', 0
+        elif len(pot_countries) == 1:
+            print(pot_countries)
+            return pot_countries[0], len(pot_countries[0])
 
 def add_pot_attr(attributes, word):
 
@@ -445,27 +467,29 @@ def add_pot_attr(attributes, word):
 
 def input_to_arrays(words):
 
-    #continents = []
     countries = []
     attributes = []
     description = []
 
+    prev_country = ''
+    unimportant = ['CC', 'DT', 'EX', 'FW', 'IN', 'MD', 'VBZ', 'WDT', 'WP', 'WP$', 'WRP']
+
     for i, word in enumerate(words):
-        # Choosing certain types of words to be filtered out to process less words
-        unimportant = ['CC', 'DT', 'EX', 'FW', 'IN', 'MD', 'VBZ', 'WDT', 'WP', 'WP$', 'WRP']
-        if word[1] not in unimportant:
-            # Check if a country is being referenced
-            country_words = 0
-            country_words = is_country(words, i)
-            if country_words > 0:
-                countries.append(word[0])
-            elif 'countr' in word[0] or 'nation' in word[0] or 'plac' in word[0] or 'dest' in word[0] or 'locat' in word[0]:
-                countries.append('country')
-            elif 'JJ' in word[1] or 'RB' in word[1] or 'NN' in word[1] or 'VB' in word[1]:
-                if not add_pot_attr(attributes, word[0]):
+
+        if word[0] not in prev_country:
+            # Choosing certain types of words to be filtered out to process less words
+            if word[1] not in unimportant:
+                # Check if a country is being referenced
+                prev_country, country_words = is_country(words, i)
+                if country_words > 0:
+                    countries.append(prev_country)
+                elif 'countr' in word[0] or 'nation' in word[0] or 'plac' in word[0] or 'dest' in word[0] or 'locat' in word[0]:
+                    countries.append('country')
+                elif 'JJ' in word[1] or 'RB' in word[1] or 'NN' in word[1] or 'VB' in word[1]:
+                    if not add_pot_attr(attributes, word[0]):
+                        description.append(word)
+                else:
                     description.append(word)
-            else:
-                description.append(word)
 
     return countries, attributes, description
 
@@ -700,7 +724,7 @@ def main():
     countries_df.index = countries_df.index.str.lower()
 
     global all_countries
-    all_countries = countries_df.index
+    all_countries = list(countries_df.index)
 
     continent_words = ["europe", "asia", "africa", "america", "oceania"]
 
@@ -711,6 +735,7 @@ def main():
 
     global messages
     messages = load_messages('Datasets/messages.txt')
+
     while True:    
         # Read and process input (tokenization, filtering and lemmatization)
         data = input("\n> ")
