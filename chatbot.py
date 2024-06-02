@@ -415,7 +415,7 @@ def is_country(words, i):
                 if k-i == len(pot_country):
                     break
                 if words[k][0] == pot_country[k-i] and pot_countries[j] not in new_pot_countries:
-                    print(words[k][0], pot_country[k-i], 'eq', words[i][0], pot_countries[j], '  ', new_pot_countries, k, i, len(words), len(pot_country))
+                    #print(words[k][0], pot_country[k-i], 'eq', words[i][0], pot_countries[j], '  ', new_pot_countries, k, i, len(words), len(pot_country))
                     new_pot_countries.append(pot_countries[j])
                 else:
                     if words[k][0] != pot_country[k-i]:
