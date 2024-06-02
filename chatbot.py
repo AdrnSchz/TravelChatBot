@@ -346,8 +346,34 @@ def txt_to_csv_column(txt_name):
     except:
         print('unable to write in', csv_path)
 
-def countries(country, attribute):
-    return countries_df.at[country, attribute]
+def get_rating(country, attribute, description):
+
+    if attribute != 'temperature':
+        return countries_df.at[country, attribute]
+
+    country_temp = countries_df.at[country, 'temperature']
+    ideal_temp = 17
+
+    hot_syn = ['hot', 'warm', 'humid', 'tropical']
+
+    for word in description:
+        for syn in hot_syn:
+            if syn in word:
+                ideal_temp = 22
+
+    cold_syn = ['cold', 'freez', 'chill', 'cool', 'snow', 'ice', 'icy', 'frost']
+
+    for word in description:
+        for syn in cold_syn:
+            if syn in word:
+                ideal_temp = 5
+
+    rating = 1 - (abs(country_temp - ideal_temp) /20)
+
+    if rating > 1:
+        rating = 1
+
+    return rating
 
 # Tokenize and remove punctuation
 def tokenize(text):
@@ -402,7 +428,6 @@ def load_messages(file_path):
     return msgs
 
 def is_country(words, i):
-    print('in is country')
 
     pot_countries = all_countries.copy()
     while (True):
@@ -699,7 +724,8 @@ def process_input(countries, attributes, description):
         attribute_comparison(countries, attributes, comparison, thereis_attr)        
     elif len(countries) > 0 and len(attributes) > 0:
         for country in countries:
-            check_country(country, attributes)
+            if country != 'country':
+                check_country(country, attributes)
     else:
         print('I can\'t understand. Please reformulate or elaborate more your words.')
     return
@@ -756,6 +782,11 @@ def main():
         print(countries)
         print(attributes)
         print(description)
+
+        print(get_rating('spain', 'temperature', description))
+        print(get_rating('spain', 'nightlife', description))
+        print(get_rating('andorra', 'temperature', description))
+        print(get_rating('portugal', 'temperature', description))
 
         process_input(countries, attributes, description)
 
