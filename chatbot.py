@@ -430,36 +430,37 @@ def check_country_attr(country, attributes):
     print_overall(country, average)
 
 def check_country(country, description):
+
+    specific_data = print_country_info(country, description)
     
-    country_info = countries_df.loc[country]
-    attributes = []
+    if not specific_data:
+        country_info = countries_df.loc[country]
+        attributes = []
 
-    country = country.capitalize()
+        country = country.capitalize()
 
-    with open('Datasets/dictionaries/attribute_synonyms.txt', 'r') as file:
-        lines = file.readlines()
+        with open('Datasets/dictionaries/attribute_synonyms.txt', 'r') as file:
+            lines = file.readlines()
 
-        for line in lines:
-            line = line.replace('\n', '').replace('\r', '')
-            attr_synonyms = line.split(', ')
+            for line in lines:
+                line = line.replace('\n', '').replace('\r', '')
+                attr_synonyms = line.split(', ')
 
-            attributes.append([attr_synonyms[0], 0, 'ATR'])         
+                attributes.append([attr_synonyms[0], 0, 'ATR'])         
 
-    print(country, "has the following average ratings:\n")
+        print(country, "has the following average ratings:\n")
 
-    average = 0.0
-    for attribute in attributes:
-        attr_name = attribute[0]
-        if attr_name in country_info:
-            attr_value = country_info[attr_name]
-            average += attr_value
-            print("{0}: {1}/10".format(attr_name, int(attr_value * 10)))
+        average = 0.0
+        for attribute in attributes:
+            attr_name = attribute[0]
+            if attr_name in country_info:
+                attr_value = country_info[attr_name]
+                average += attr_value
+                print("{0}: {1}/10".format(attr_name, int(attr_value * 10)))
 
-    average = average / len(attributes)
+        average = average / len(attributes)
 
-    print_overall(country, average)
-
-    print_country_info(country, description)
+        print_overall(country, average)
 
 def print_overall(country, average):
     if (average >= 1):
@@ -496,12 +497,13 @@ def print_basic_info(country):
         print("As general information, " + country_info["country"] + " is a poor country")
 
     print("It is located in " + country_info["region"] + " and their main language is " + country_info["language"] + ". It has a population of " + str(country_info["population"]) +
-                " people, they use the " + country_info["currency"] + " as its currency and its " + country_info["title"].lower() + " is " + country_info["political_leader"])
+                " people, they use the " + country_info["currency"] + " as its currency and its " + country_info["title"].lower() + " is " + country_info["political_leader"] + "\n")
     
 def print_country_info(country, parameters):
 
     if (len(parameters) == 0):
         print_basic_info(country)
+        return False
     else:
         unique = [True, True, True, True, True, True, True]
         country_info = general_data.get_country(country)
@@ -509,6 +511,7 @@ def print_country_info(country, parameters):
         strings.append(country_info["country"])
         coma = True
         for parameter in parameters:
+            parameter = parameter[0]
             coma = True
 
             if unique[0] and parameter == "currency":
@@ -517,25 +520,20 @@ def print_country_info(country, parameters):
             elif unique[1] and (parameter == "rich" or parameter == "poor"):
                 unique[1] = False
                 if country_info["gdp"] / country_info["population"] >= general_data.gdp_avg:
-                    strings.append(" is a rich country")
+                    strings.append(" is a rich country, it has a gross domestic product of " + str(int(country_info["gdp"])))
                 else:
-                    strings.append(" is a poor country")
-            elif unique[2] and (parameter == "danger" or parameter == "secure" or parameter == "safe"):
-                unique[2] = False
-                if abs(general_data.crime_rate_avg - country_info["crime_rate"]) < 10:
-                    strings.append(" has a medium crime rate")
-                elif country_info["crime_rate"] >= general_data.crime_rate_avg:
-                    strings.append(" has a high crime rate")
-                elif country_info["crime_rate"] != -1:
-                    strings.append(" has a low crime rate")
-                else:
-                    strings.append(" does not have enough crime statistics to determine whether it is safe or not")
+                    strings.append(" is a poor country, it has a gross domestic product of " + str(int(country_info["gdp"])))
             else:
                 coma = False
             if coma:
-                strings.append(",")   
+                strings.append(",")  
+
+        if len(strings) == 1:
+            print_basic_info(country)
+            return False 
                  
         print(join_strings(strings))  
+        return True
 
 def get_countries_attr(attributes):
 
