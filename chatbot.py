@@ -7,6 +7,7 @@ from nltk.tag import pos_tag
 from nltk.corpus import stopwords
 from collections import deque
 from nltk.stem import LancasterStemmer, PorterStemmer, WordNetLemmatizer, SnowballStemmer
+from sklearn.cluster import KMeans
 
 '''
 class BasicInfo:
@@ -727,6 +728,43 @@ def get_countries_attr(attributes):
     
     print("The countries with the best {} are {}.".format(', '.join(attr), ', '.join(top_countries[:3])))
 
+def get_similar_country(country, attributes):
+
+    attr = [attribute[0] for attribute in attributes if attribute[0] in countries_df.iloc[0]]
+
+    whole_comparison = False
+    if len(attr) == 0:
+        whole_comparison = True
+        attr = countries_df.columns.tolist()
+
+    df_attr = countries_df[attr].copy(True)
+
+    # Normalize temperature
+    if 'temperature' in attr:
+        df_attr['temperature'] = (df_attr['temperature'] - df_attr['temperature'].min()) / (df_attr['temperature'].max() - df_attr['temperature'].min())
+
+    kmeans = KMeans(5, init='k-means++', n_init=100)
+    labels = kmeans.fit_predict(df_attr)
+
+    df_attr['cluster'] = labels
+    
+    country_cluster = df_attr.loc[df_attr.index == country, 'cluster'].iloc[0]
+
+    similar_countries = df_attr.loc[df_attr['cluster'] == country_cluster]
+    similar_countries = similar_countries.drop(country)
+
+    if whole_comparison:
+        print("Some countries that are similar to {} are {}.".format(country.capitalize(), ', '.join(similar_countries.sample(n=3).index)))
+    else:
+        print("Some countries that are similar to {} when it comes to {} are {}.".format(country.capitalize(), ', '.join(attr), ', '.join(similar_countries.sample(n=3).index)))
+
+def check_for_similar(description):
+    synonyms = ['similar', 'alternative', 'equivalent', 'like', 'equal', 'resembles', 'same']
+    if any(word in synonyms for word, _ in description):
+        return True
+    else:
+        return False
+
 def process_input(countries, attributes, description):
 
     thereis_attr = False
@@ -744,20 +782,24 @@ def process_input(countries, attributes, description):
     print(description)
 
     if comparison != '' and (len(countries) == 0 or len(countries) > 2 or (len(countries) == 2 and 'country' not in countries)):
-        attribute_comparison(countries, attributes, comparison, thereis_attr) 
-    elif "country" in countries and len(attributes) > 0:
-        get_countries_attr(attributes)       
-    elif len(countries) > 0 and len(attributes) > 0:
+        attribute_comparison(countries, attributes, comparison, thereis_attr)  
+    elif any(item != "country" for item in countries) and check_for_similar(description):
+        for country in countries:
+            if country != "country":
+                get_similar_country(country, attributes)
+                break
+    elif any(item != "country" for item in countries) and len(attributes) > 0:
         for country in countries:
             if country != "country":
                 check_country_attr(country, attributes)
-    elif len(countries) > 0 and any(item != "country" for item in countries):
+    elif "country" in countries and len(attributes) > 0:
+        get_countries_attr(attributes)         
+    elif any(item != "country" for item in countries):
         for country in countries:
             if country != "country":
                 check_country(country)
     else:
         print('I can\'t understand. Please reformulate or elaborate more your words.')
-    return
 
 def main():
 
