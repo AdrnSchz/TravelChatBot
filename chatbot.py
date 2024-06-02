@@ -670,7 +670,7 @@ def process_input(countries, attributes, description):
             comparison = word[0]
         
 
-    if comparison != '' and len(countries) > 0:
+    if comparison != '':
         attribute_comparison(countries, attributes, comparison, thereis_attr)        
     elif len(countries) > 0:
         for country in countries:
