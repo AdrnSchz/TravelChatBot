@@ -511,7 +511,8 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
     attribute_names = []
     for attribute in attributes:
-        attribute_names.append(attribute[0])
+        if attribute[2] == 'ATR':
+            attribute_names.append(attribute[0])
 
     if len(countries_best) > 1:
         print_inlist_format(countries_best)
@@ -522,8 +523,7 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
             print_inlist_format(attribute_names)
         print()
     else:
-        print(attribute_names)
-        print(countries_best[0]+' has the '+comparison+' ', end='')
+        print(countries_best[0]+' has the '+ comparison + ' combination of ', end='')
         print_inlist_format(attribute_names)
 
 
