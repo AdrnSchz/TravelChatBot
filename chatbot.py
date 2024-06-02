@@ -392,6 +392,15 @@ def csv_to_asso_arr(path):
         asso_arr[df_words.iat[i, 0]] = df_words.iat[i, 1]
     return asso_arr
 
+def load_messages(file_path):
+    msgs = {}
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            key, message = line.strip().split('=')
+            msgs[key] = message
+    return msgs
+
 def is_country(words, i):
     # TODO: Check for country names with more than one word (take into account words that have been removed)
     # TODO: Check for variations of a country name
@@ -472,7 +481,6 @@ def print_inlist_format(list):
     return
 
 def attribute_comparison(countries, attributes, comparison, thereis_attr):
-
     if not thereis_attr:
         attributes = []
         for attribute in countries_df.columns:
@@ -488,15 +496,21 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
 
     countries_best = []
     best = 0
+    attribute_winners = {attribute[0]: [] for attribute in attributes if attribute[2] == 'ATR'}
 
     for country in countries:
         if country != 'country':
             i = 0
             average_attributes_rating = 0.0
+
             for i, attribute in enumerate(attributes):
                 if attribute[2] == 'ATR':
                     if attribute[0] != 'temperature':
                         average_attributes_rating += countries_df.loc[country, attribute[0]]
+                        if not attribute_winners[attribute[0]] or countries_df.loc[country, attribute[0]] > countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
+                            attribute_winners[attribute[0]] = [country]
+                        elif countries_df.loc[country, attribute[0]] == countries_df.loc[attribute_winners[attribute[0]][0], attribute[0]]:
+                            attribute_winners[attribute[0]].append(country)
                     else:
                         # TODO: handle temperature
                         i -= 1
@@ -509,21 +523,42 @@ def attribute_comparison(countries, attributes, comparison, thereis_attr):
             elif average_attributes_rating == best:
                 countries_best.append(country)
 
-    attribute_names = []
-    for attribute in attributes:
-        if attribute[2] == 'ATR':
-            attribute_names.append(attribute[0])
+    lastWinner = ''
 
-    if len(countries_best) > 1:
+    for attribute, winners in attribute_winners.items():
+        again = False
+        different = False
+
+        if len(winners) == 1 and winners[0] == lastWinner:
+            again = True
+        elif len(winners) == 1 or (lastWinner != '' and lastWinner not in winners):
+            different = True
+
+        if different:
+            print(f"Nevertheless, in terms of " + attribute + ", ", end='')
+        else:
+            print("In terms of" + attribute + ", ", end='')
+
+        print_inlist_format(winners)
+        if again:
+            print(' is also the best ', end='')
+        elif (len(winners) > 1):
+            lastWinner = ''
+            print(' are the best ', end='')
+        else:
+            lastWinner = winners[0]
+            print('is the best ', end='')
+
+
+    if len(countries_best) == len(countries):
+        print('Overall, all the countries you mentioned are similarly good. The best one will depend on your preferences.')
+    elif len(countries_best) > 1:
+        print('Overall, ', end='')
         print_inlist_format(countries_best)
-        print('are similarly good', end=' ')
-
-        if (len(countries_best) < len(countries)):
-            print('and have a better ', end='')
-            print_inlist_format(attribute_names)
-        print()
+        print('are similarly good. The best one will depend on your preferences.')
     else:
-        print(countries_best[0]+' has the '+ comparison + ' combination of ', end='')
+        print(attribute_names)
+        print(countries_best[0]+' has the '+comparison+' ', end='')
         print_inlist_format(attribute_names)
 
 
@@ -540,9 +575,13 @@ def process_input(countries, attributes, description):
             comparison = word[0]
         
 
-    if comparison != '':
+    if comparison != '' and len(countries) > 0:
         attribute_comparison(countries, attributes, comparison, thereis_attr)        
-        
+    elif len(countries) > 0:
+        for country in countries:
+            check_country(country, attributes)
+    else:
+        print('I can\'t understand. Please reformulate or elaborate more your words.')
     return
 
 def main():
@@ -575,6 +614,8 @@ def main():
     global modifiers
     modifiers  = csv_to_asso_arr('Datasets/dictionaries/modifier_ratings.csv')
 
+    global messages
+    messages = load_messages('Datasets/messages.txt')
     while True:    
         # Read and process input (tokenization, filtering and lemmatization)
         data = input("\n> ")
